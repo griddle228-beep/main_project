@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"log"
 	"os"
-	"path/filepath"
 
 	"semen_project/internal/routes"
 	"semen_project/internal/pkg/pgconn"
@@ -33,25 +31,55 @@ func Run(cfg *config.Config) error {
 
 	slog.Info("PostgreSQL connection established")
 
+	// ИСПРАВЛЕННЫЙ КОД С ЛОГИРОВАНИЕМ
+	// ============================================
+	
+	// Получаем текущую директорию
+	currentDir, _ := os.Getwd()
+	slog.Info("current directory", "path", currentDir)
+	
+	// Правильный путь к миграциям (в корне проекта)
 	migrationsPath := "migrations"
 	
-	// Проверяем, существует ли папка
+	// Проверяем существование папки
 	if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
-		// Если не нашли, пробуем подняться выше
-		migrationsPath = filepath.Join("..", "migrations")
-		
-		// Проверяем снова
-		if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
-			slog.Error("migrations directory not found", "tried", []string{"migrations", "../migrations"})
-			return fmt.Errorf("migrations directory not found")
+		slog.Error("migrations folder not found!", "path", migrationsPath)
+		return fmt.Errorf("migrations folder not found at %s", migrationsPath)
+	}
+	
+	// Проверяем содержимое папки
+	files, _ := os.ReadDir(migrationsPath)
+	slog.Info("migrations folder content:")
+	for _, f := range files {
+		if !f.IsDir() {
+			slog.Info("  - " + f.Name())
 		}
 	}
-	slog.Info("found migrations", "path", migrationsPath)
-
+	
+	// СОЗДАЕМ МИГРАТОР
 	migrator := database.NewMigrator(dbPool)
-    if err := migrator.RunMigrations(migrationsPath); err != nil {
-        log.Fatal("Failed to run migrations:", err)
-    }
+	slog.Info("starting migrations...")
+	
+	// ЗАПУСКАЕМ МИГРАЦИИ - ЭТО КЛЮЧЕВОЙ МОМЕНТ!
+	err = migrator.RunMigrations(migrationsPath)
+	if err != nil {
+		slog.Error("failed to run migrations", "error", err)
+		return fmt.Errorf("migration failed: %w", err)
+	}
+	
+	slog.Info("migrations completed successfully")
+	
+	// Проверяем, создалась ли таблица
+	var tableExists bool
+	checkQuery := `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')`
+	err = dbPool.QueryRow(ctx, checkQuery).Scan(&tableExists)
+	if err != nil {
+		slog.Error("failed to check table existence", "error", err)
+	} else if tableExists {
+		slog.Info("✅ Table 'users' exists")
+	} else {
+		slog.Error("❌ Table 'users' does NOT exist")
+	}
 	
 	handler := controllers.NewHandlers(dbPool) 
 
