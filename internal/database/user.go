@@ -29,7 +29,7 @@ func (u *UserStore)GetAllUsers() ([]models.User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.UserName, &user.FirstName, &user.LastName, &user.Password)
+		err := rows.Scan(&user.ID, &user.UserName, &user.FirstName, &user.LastName, &user.Password)
 		if err != nil {
 			return nil, err
 		}

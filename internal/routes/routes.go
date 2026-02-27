@@ -9,6 +9,7 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 	// GET запросы
 	r.GET("/hello", controller.Hello)
 	r.GET("/answer", controller.Answer)
+	r.GET("/getallusers", h.GetAllUsers)
 	// POST запросы
 	r.POST("/createuser", h.Create)
 }
