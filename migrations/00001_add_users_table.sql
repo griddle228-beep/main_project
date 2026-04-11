@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 
 
 CREATE TABLE IF NOT EXISTS users (
@@ -7,5 +9,12 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(255),
     password VARCHAR(255) NOT NULL
 );
-INSERT INTO users (user_name, first_name, last_name, password) VALUES ('admin', 'Admin', 'Adminov', '1111');
 
+
+
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE IF EXISTS users;
+-- +goose StatementEnd

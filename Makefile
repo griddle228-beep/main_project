@@ -1,67 +1,106 @@
-.PHONY: help build run clean deps fmt vet test
+.PHONY: help build run test migrate-up migrate-down migrate-create docker-build docker-up docker-down clean
 
-# Переменные
-APP_NAME=platform
-BUILD_DIR=bin
-CMD_DIR=cmd/platform
-MAIN_FILE=$(CMD_DIR)/main.go
+# Variables
+APP_NAME=devx-service-backend
+MIGRATIONS_DIR=./migrations
+DOCKER_COMPOSE=docker-compose
 
-help: ## Показать справку
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+help: ## Show this help message
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Available targets:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
-deps: ## Установить зависимости
-	@echo "Загрузка зависимостей..."
+build: ## Build the application
+	@echo "Building $(APP_NAME)..."
+	go build -o bin/$(APP_NAME) main.go
+	go build -o bin/migrator cmd/migrator/main.go
+
+run: ## Run the application locally
+	@echo "Running $(APP_NAME)..."
+	go run cmd/app/main.go
+
+test: ## Run tests
+	@echo "Running tests..."
+	go test -v ./...
+
+deps: ## Install dependencies
+	@echo "Installing dependencies..."
 	go mod download
 	go mod tidy
 
-build: ## Собрать приложение
-	@echo "Сборка приложения..."
-	@mkdir -p $(BUILD_DIR)
-	go build -o $(BUILD_DIR)/$(APP_NAME) $(MAIN_FILE)
-	@echo "✓ Приложение собрано: $(BUILD_DIR)/$(APP_NAME)"
+migrate-up: ## Run database migrations up
+	@echo "Running migrations up..."
+	go run cmd/migrator/main.go $(MIGRATIONS_DIR) up
 
-run: ## Запустить приложение
-	@echo "Запуск приложения..."
-	go run $(MAIN_FILE)
+migrate-down: ## Rollback last migration
+	@echo "Rolling back last migration..."
+	go run cmd/migrator/main.go $(MIGRATIONS_DIR) down
 
-run-build: build ## Собрать и запустить
-	@echo "Запуск собранного приложения..."
-	./$(BUILD_DIR)/$(APP_NAME)
+migrate-create: ## Create a new migration file (usage: make migrate-create NAME=add_users_table)
+	@if [ -z "$(NAME)" ]; then \
+		echo "Error: NAME is required. Usage: make migrate-create NAME=your_migration_name"; \
+		exit 1; \
+	fi
+	@NEXT_NUM=$$(ls -1 $(MIGRATIONS_DIR)/*.sql 2>/dev/null | wc -l | xargs); \
+	NEXT_NUM=$$((NEXT_NUM + 1)); \
+	FILE_NUM=$$(printf "%05d" $$NEXT_NUM); \
+	FILENAME="$(MIGRATIONS_DIR)/$${FILE_NUM}_$(NAME).sql"; \
+	echo "Creating migration: $$FILENAME"; \
+	echo "-- +goose Up" > $$FILENAME; \
+	echo "-- +goose StatementBegin" >> $$FILENAME; \
+	echo "-- Write your UP migration here" >> $$FILENAME; \
+	echo "-- +goose StatementEnd" >> $$FILENAME; \
+	echo "" >> $$FILENAME; \
+	echo "-- +goose Down" >> $$FILENAME; \
+	echo "-- +goose StatementBegin" >> $$FILENAME; \
+	echo "-- Write your DOWN migration here" >> $$FILENAME; \
+	echo "-- +goose StatementEnd" >> $$FILENAME; \
+	echo "Migration created: $$FILENAME"
 
-fmt: ## Форматировать код
-	@echo "Форматирование кода..."
+docker-build: ## Build Docker images
+	@echo "Building Docker images..."
+	$(DOCKER_COMPOSE) build
+
+docker-up: ## Start Docker containers with migrations
+	@echo "Starting Docker containers..."
+	$(DOCKER_COMPOSE) up -d
+	@echo "Waiting for database to be ready..."
+	@sleep 5
+	@echo "Running migrations..."
+	@$(DOCKER_COMPOSE) exec -T backend go run cmd/migrator/main.go ./migrations up || true
+	@echo "Application is ready!"
+
+docker-down: ## Stop Docker containers
+	@echo "Stopping Docker containers..."
+	$(DOCKER_COMPOSE) down
+
+docker-logs: ## Show Docker logs
+	$(DOCKER_COMPOSE) logs -f
+
+docker-restart: docker-down docker-up ## Restart Docker containers
+
+clean: ## Clean build artifacts
+	@echo "Cleaning..."
+	rm -rf bin/
+	go clean
+
+lint: ## Run linter
+	@echo "Running linter..."
+	golangci-lint run
+
+fmt: ## Format code
+	@echo "Formatting code..."
 	go fmt ./...
+	gofmt -s -w .
 
-vet: ## Проверить код
-	@echo "Проверка кода..."
-	go vet ./...
+dev: ## Run in development mode with auto-reload (requires air)
+	@echo "Running in development mode..."
+	air
 
-clean: ## Удалить бинарные файлы
-	@echo "Очистка..."
-	rm -rf $(BUILD_DIR)
-	@echo "✓ Очистка завершена"
+install-tools: ## Install development tools
+	@echo "Installing development tools..."
+	go install github.com/cosmtrek/air@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-test: ## Запустить тесты
-	@echo "Запуск тестов..."
-	go test -v ./...
-
-setup: ## Начальная настройка проекта
-	@echo "Настройка проекта..."
-	@if [ ! -f .env ]; then cp .env.example .env; echo "✓ Создан файл .env"; fi
-	@$(MAKE) deps
-	@echo "✓ Проект настроен"
-
-docker-postgres: ## Запустить PostgreSQL в Docker
-	@echo "Запуск PostgreSQL в Docker..."
-	docker run --name postgres-dev \
-		-e POSTGRES_PASSWORD=password \
-		-e POSTGRES_DB=semen_db \
-		-p 5432:5432 \
-		-d postgres:15-alpine
-	@echo "✓ PostgreSQL запущен на порту 5432"
-
-docker-stop: ## Остановить Docker контейнеры
-	@echo "Остановка контейнеров..."
-	docker stop postgres-dev || true
-	docker rm postgres-dev || true
-	@echo "✓ Контейнеры остановлены"
+.DEFAULT_GOAL := help
