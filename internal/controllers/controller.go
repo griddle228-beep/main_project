@@ -100,4 +100,7 @@ func (h *Handlers) CreatePost(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
 }
-func 
+// func (h *Handlers) GetUserById(ctx *gin.Context)
+// 	var user models.User
+// 	if err := ctx.
+func (h *Handlers) 

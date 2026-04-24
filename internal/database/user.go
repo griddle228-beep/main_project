@@ -228,7 +228,7 @@ func (s *UserStore) GetUserPostsId(user_id int) ([]int, error) {
 	return post_id, nil
 }
 func (s *UserStore) AddLike(post_id int, user_id int) error {
-	query := `INSERT INTO likes (post_id, user_id) VALUES ($1, $2);`
+	query := `INSERT INTO likes (post_id, user_id) VALUES ($1, $2); ON CONFLICT DO NOTHING;`
 	_, err := s.db.Exec(context.Background(), query, post_id, user_id)
 	if err != nil {
 		return err
@@ -524,4 +524,3 @@ func (s *UserStore) GetAllPostsByUserID(user_id int) ([]models.Post, error) {
 	}
 	return posts, nil
 }
-  

@@ -19,7 +19,7 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 	// /create_post
 	r.POST("/createpost", h.CreatePost)
 	// /profile
-	
+	r.GET("/")
 	// /feed
 
 	// /activity
