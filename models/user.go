@@ -27,16 +27,17 @@ type Friend struct {
 	UserID   int `json:"user_id"`
 	FriendID int `json:"friend_id"`
 }
-type Message struct {
+type Messages struct {
 	ID        int    `json:"id"`
 	SenderID  int    `json:"sender_id"`
-	ReceiverID int    `json:"receiver_id"`
+	ReceiverID int   `json:"receiver_id"`
 	Content   string `json:"content"`
 }
 type DirectMessage struct {
 	ID        int    `json:"id"`
+	ChatID    int    `json:"chat_id"`
 	SenderID  int    `json:"sender_id"`
-	ReceiverID int    `json:"receiver_id"`
+	ReceiverID int   `json:"receiver_id"`
 	Content   string `json:"content"`
 }
 type Direct struct {
@@ -56,4 +57,10 @@ type Notification struct {
 	ID      int    `json:"id"`
 	UserID  int    `json:"user_id"`
 	Content string `json:"content"`
+}
+type UserPublic struct {
+	ID        int    `json:"id"`
+	UserName  string `json:"user_name"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }

@@ -23,15 +23,8 @@ func (h *Handlers) Create(ctx *gin.Context) {
 	}
 	createdUser, err := h.DbPool.CreateUser(user)
 	if err != nil {
-		// Добавьте подробное логирование ошибки
 		log.Printf("ОШИБКА в CreateUser: %v", err)
-		log.Printf("Данные пользователя: %+v", user)
-
-		// Верните более информативную ошибку
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Failed to create user",
-			"details": err.Error(), // Добавьте детали ошибки
-		})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"user": createdUser})
@@ -42,9 +35,7 @@ func (h *Handlers) GetAllUsers(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("ОШИБКА в GetAllUsers: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve users",
-			"details": err.Error(),
-		})
+			"error":   "Failed to retrieve users"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"users": аllUsers})
@@ -62,28 +53,38 @@ func (h *Handlers) Authentication(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "UserName и Password не могут быть пустыми"})
 		return
 	}
+
 	user, err := h.DbPool.GetUserByUsername(loginData.UserName)
 	if err != nil {
 		log.Printf("ОШИБКА в GetUserByUsername: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve user",
-			"details": err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
 		return
 	}
+
+	if user.Password != loginData.Password {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Неверные учётные данные"})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }
 func (h *Handlers) GetAllFriends(ctx *gin.Context) {
-	аllFriends, err := h.DbPool.GetAllFriends()
+	idParam := ctx.Param("id")
+	userID, err := strconv.Atoi(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+		return
+	}
+
+	аllFriends, err := h.DbPool.GetAllFriends(userID)
 	if err != nil {
 		log.Printf("ОШИБКА в GetAllFriends: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve friends",
-			"details": err.Error(),
+			"error": "Failed to retrieve friends",
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"Friends": аllFriends})
+	ctx.JSON(http.StatusOK, gin.H{"friends": аllFriends})
 }
 func (h *Handlers) CreatePost(ctx *gin.Context) {
 	var post models.Post
@@ -91,12 +92,14 @@ func (h *Handlers) CreatePost(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
+	if strings.TrimSpace(post.Content) == ""{
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Content не может быть пустым"})
+		return
+	}
 	if err := h.DbPool.CreatePost(post.UserID, post.Content); err != nil {
 		log.Printf("ОШИБКА в CreatePost: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to create post",
-			"details": err.Error(),
-		})
+			"error":   "Failed to create post"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
@@ -505,8 +508,25 @@ func (h *Handlers) GetUserByUsername(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"User": user})
 }
-func (h *Handlers) GetPostsById()
+func (h *Handlers) GetPostsById(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+	userID, err := strconv.Atoi(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+		return
+	}
 
+	posts, err := h.DbPool.GetAllPostsByUserID(userID)
+	if err != nil {
+		log.Printf("ОШИБКА в GetPostsById: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to retrieve posts",
+			"details": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"posts": posts})
+}
 
 	
 

@@ -33,6 +33,9 @@ func Run(cfg *config.Config) error {
 
 	router := gin.Default()
 	routes.SetupRoutes(router, handler)
-	router.Run(fmt.Sprintf(":%d", cfg.PublicApiPort))
+	if err := router.Run(fmt.Sprintf(":%d", cfg.PublicApiPort)); err != nil {
+    	return fmt.Errorf("server run failed: %w", err)
+	}
 	return nil
-}
+} 
+

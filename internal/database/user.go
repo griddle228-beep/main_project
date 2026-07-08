@@ -75,31 +75,6 @@ func (s *UserStore) GetUserByUsername(username string) (*models.User, error) {
 	}
 	return &user, nil
 }
-func (s *UserStore) GetAllFriends() ([]models.User, error) {
-	var users []models.User
-
-	query := `
-    SELECT u.id, u.user_name, u.first_name, u.last_name 
-    FROM users u
-    JOIN friends f ON u.id = f.friend_id
-    WHERE f.user_id = $1;
-    `
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var user models.User
-		err := rows.Scan(&user.ID, &user.UserName, &user.FirstName, &user.LastName, &user.Password)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, user)
-	}
-	return users, nil
-}
-
 func (s *UserStore) GetUserById(id int) (*models.User, error) {
 	var user models.User
 	query := `SELECT id, user_name, first_name, last_name, password FROM users WHERE id = $1`
@@ -109,6 +84,7 @@ func (s *UserStore) GetUserById(id int) (*models.User, error) {
 		&user.UserName,
 		&user.FirstName,
 		&user.LastName,
+		&user.Password,
 	)
 	if err != nil {
 		return nil, err
@@ -367,7 +343,7 @@ func (s *UserStore) GetDirectID(user_id int, friend_id int) (int, error) {
 }
 func (s *UserStore) ExploreUsers(user_id int) ([]models.User, error) {
 	var users []models.User
-	query := `SELECT id, username FROM users WHERE id != $1;`
+	query := `SELECT id, user_name FROM users WHERE id != $1;`
 	rows, err := s.db.Query(context.Background(), query, user_id)
 	if err != nil {
 		return nil, err
@@ -385,7 +361,7 @@ func (s *UserStore) ExploreUsers(user_id int) ([]models.User, error) {
 }
 func (s *UserStore) ExploreGlobalPosts() ([]models.Post, error) {
 	var posts []models.Post
-	query := `SELECT id, user_id, content FROM posts;`
+	query := `SELECT id, user_id,  content FROM posts;`
 	rows, err := s.db.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
@@ -666,4 +642,28 @@ func (s * UserStore) GetAllPostsById(user_id int) ([]models.Post, error) {
 	}
 	return posts, nil
 }
-	
+func (s *UserStore) GetAllFriends(user_id int) ([]models.UserPublic, error) {
+	var friends []models.UserPublic
+
+	query := `
+	SELECT u.id, u.user_name, u.first_name, u.last_name
+	FROM users u
+	JOIN friends f ON u.id = f.friend_id
+	WHERE f.user_id = $1;
+	`
+	rows, err := s.db.Query(context.Background(), query, user_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var friend models.UserPublic
+		err := rows.Scan(&friend.ID, &friend.UserName, &friend.FirstName, &friend.LastName)
+		if err != nil {
+			return nil, err
+		}
+		friends = append(friends, friend)
+	}
+	return friends, nil
+}

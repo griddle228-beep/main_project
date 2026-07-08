@@ -34,31 +34,28 @@ CREATE TABLE IF NOT EXISTS direct_messeges (
     id SERIAL PRIMARY KEY,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
+    content VARCHAR(10000) NOT NULL,
     FOREIGN KEY (sender_id) REFERENCES users(id),
     FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
 CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
-    direct_messege_id INT NOT NULL,
-    user_id INT NOT NULL,
+    chat_id SERILAL NOT NULL PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
     content VARCHAR(10000) NOT NULL,
-    FOREIGN KEY (direct_messege_id) REFERENCES direct_messeges(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (chat_id) REFERENCES direct_messeges(id),
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
 CREATE TABLE IF NOT EXISTS subscriptions (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
-    
-
-
-
-
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS subscriptions, messages, direct_messeges, likes, comments, posts, friends;
 -- +goose StatementEnd

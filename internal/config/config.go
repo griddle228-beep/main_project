@@ -26,6 +26,6 @@ func  Load(cfg *Config) error {
 	return nil
 }
 
-func (cfg *Config) PublicApiAddr() string {        /* че это*/
+func (cfg *Config) PublicApiAddr() string {        
 	return fmt.Sprintf("%s:%d", cfg.PublicApiHost, cfg.PublicApiPort)
 }

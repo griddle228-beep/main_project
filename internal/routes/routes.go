@@ -46,7 +46,6 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 	// / direct_messege
 
 	// /friends
-	r.GET("/friends", h.GetAllFriends)
-	// /Notifications
+	r.GET("/friends/:id", h.GetAllFriends)	// /Notifications
 	r.GET("/notifications", h.GetAllNotifications)
 }
