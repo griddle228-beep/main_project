@@ -14,7 +14,7 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 	// /auth
 	r.POST("/authentication", h.Authentication)
 	// /create_user
-	r.POST("/createuser", h.Create)
+	r.POST("/createuser", h.CreateUser)
 	// /create_post
 	r.POST("/createpost", h.CreatePost)
 	r.POST("/deletepost", h.DeletePost)

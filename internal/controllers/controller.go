@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handlers) Create(ctx *gin.Context) {
+func (h *Handlers) CreateUser(ctx *gin.Context) {
 	var err error
 	var user models.User
 	if err = ctx.BindJSON(&user); err != nil {
@@ -185,7 +185,7 @@ func (h *Handlers) GetAllMessages(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"Messages": аllMessages})
 }
 func (h *Handlers) CreateMessage(ctx *gin.Context) {
-	var message models.Message
+	var message models.Messages
 	if err := ctx.BindJSON(&message); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
@@ -200,7 +200,6 @@ func (h *Handlers) CreateMessage(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Message created successfully"})
 }
-
 
 func (h *Handlers) GetAllLikes(ctx *gin.Context) {
 	аllLikes, err := h.DbPool.GetAllLikes()
@@ -232,12 +231,12 @@ func (h *Handlers) CreateLike(ctx *gin.Context) {
 }
 
 func (h *Handlers) DeletePost(ctx *gin.Context) {
-    idStr := ctx.Param("id")
-    id, err := strconv.Atoi(idStr)
-    if err != nil {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID должен быть числом"})
-        return
-    }
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID должен быть числом"})
+		return
+	}
 	user, err := h.DbPool.GetUserById(id)
 	if err != nil {
 		log.Printf("ОШИБКА в GetUserById: %v", err)
@@ -314,9 +313,7 @@ func (h *Handlers) DeleteLike(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("ОШИБКА в GetLikeById: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve like",
-			"details": err.Error(),
-		})
+			"error": "Failed to retrieve like"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"Like": like})
@@ -368,9 +365,7 @@ func (h *Handlers) UpdatePost(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("ОШИБКА в GetPostById: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve post",
-			"details": err.Error(),
-		})
+			"error": "Failed to retrieve post"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"Post": post})
@@ -382,16 +377,14 @@ func (h *Handlers) GetPostById(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID должен быть числом"})
 		return
 	}
-	post, err := h.DbPool.GetPostById(id)
+	Post, err := h.DbPool.GetPostById(id)
 	if err != nil {
 		log.Printf("ОШИБКА в GetPostById: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve post",
-			"details": err.Error(),
-		})
+			"error": "Failed to retrieve post"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"Post": post})
+	ctx.JSON(http.StatusOK, gin.H{"Post": Post})
 }
 func (h *Handlers) GetLikeById(ctx *gin.Context) {
 	idStr := ctx.Param("id")

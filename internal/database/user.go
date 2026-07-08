@@ -500,17 +500,17 @@ func (s *UserStore) GetAllPostsByUserID(user_id int) ([]models.Post, error) {
 	}
 	return posts, nil
 }
-func (s *UserStore) GetAllMessages() ([]models.Message, error) {
-	var messages []models.Message
-	query := `SELECT id, user_id, content FROM messages;`
+func (s *UserStore) GetAllMessages() ([]models.Messages, error) {
+	var messages []models.Messages
+	query := `SELECT id, receiver_id, sender_id, content FROM messages;`
 	rows, err := s.db.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var message models.Message
-		err := rows.Scan(&message.ID, &message.SenderID, &message.Content)
+		var message models.Messages
+		err := rows.Scan(&message.ID, &message.SenderID, &message.ReceiverID, &message.Content)
 		if err != nil {
 			return nil, err
 		}
@@ -534,12 +534,12 @@ func (s *UserStore) DeleteMessage(message_id int) error {
 	}
 	return nil
 }
-func (s * UserStore) GetMessageById(message_id int) (models.Message, error) {
-	var message models.Message
+func (s * UserStore) GetMessageById(message_id int) (models.Messages, error) {
+	var message models.Messages
 	query := `SELECT id, sender_id, receiver_id, content FROM messages WHERE id = $1;`
 	err := s.db.QueryRow(context.Background(), query, message_id).Scan(&message.ID, &message.SenderID, &message.ReceiverID, &message.Content)
 	if err != nil {
-		return models.Message{}, err
+		return models.Messages{}, err
 	}
 	return message, nil
 }
