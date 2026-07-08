@@ -12,14 +12,14 @@ CREATE TABLE IF NOT EXISTS friends (
 CREATE TABLE IF NOT EXISTS posts (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
-    content VARCHAR(255) NOT NULL,
+    content VARCHAR(10000) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 CREATE TABLE IF NOT EXISTS comments (
     id SERIAL PRIMARY KEY,
     post_id INT NOT NULL,
     user_id INT NOT NULL,
-    content VARCHAR(255) NOT NULL,
+    content VARCHAR(10000) NOT NULL,
     FOREIGN KEY (post_id) REFERENCES posts(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -41,14 +41,14 @@ CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
     direct_messege_id INT NOT NULL,
     user_id INT NOT NULL,
-    content VARCHAR(255) NOT NULL,
+    content VARCHAR(10000) NOT NULL,
     FOREIGN KEY (direct_messege_id) REFERENCES direct_messeges(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 CREATE TABLE IF NOT EXISTS subscriptions (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
     
