@@ -37,14 +37,6 @@ type Messages struct {
 	ID         int    `json:"id"`
 	ChatID     int    `json:"chat_id"`
 	SenderID   int    `json:"sender_id"`
-	ReceiverID int    `json:"receiver_id"`
-	Content    string `json:"content"`
-}
-type DirectMessage struct {
-	ID         int    `json:"id"`
-	ChatID     int    `json:"chat_id"`
-	SenderID   int    `json:"sender_id"`
-	ReceiverID int    `json:"receiver_id"`
 	Content    string `json:"content"`
 }
 type Subscription struct {

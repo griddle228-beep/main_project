@@ -188,7 +188,7 @@ func (h *Handlers) CreateMessage(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
-	if err := h.DbPool.CreateMessage(message.SenderID, message.ReceiverID, message.Content); err != nil {
+	if err := h.DbPool.CreateMessage( message.ChatID, message.SenderID, message.Content); err != nil {
 		log.Printf("ОШИБКА в CreateMessage: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to create message",

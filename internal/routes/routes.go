@@ -46,7 +46,7 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 	// / Chats
 	r.GET("/deletechatbyid/:id", h.DeleteChatById)
 	// /friends
-	r.GET("/friends/:id", h.GetAllFriends)	
+	r.GET("/getallfriends/:id", h.GetAllFriends)	
 	// /Notifications
 	r.GET("/notifications", h.GetAllNotifications)
 }

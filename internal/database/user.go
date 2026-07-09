@@ -314,32 +314,23 @@ func (s *UserStore) DeleteDirect(direct_id int) error {
 	}
 	return nil
 }
-func (s *UserStore) GetUserByDirectID(direct_id int) (int, error) {
-	var user_id int
-	query := `SELECT user_id FROM directs WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, direct_id).Scan(&user_id)
+func (s *UserStore) GetUsersByChatID(chat_id int) (models.Chat, error) {
+	var users_id models.Chat
+	query := `SELECT user_first, user_second  FROM chat WHERE id = $1;`
+	err := s.db.QueryRow(context.Background(), query, chat_id).Scan(&users_id.UserFirst, &users_id.UserSecond)
 	if err != nil {
-		return 0, err
+		return models.Chat{}, err
 	}
-	return user_id, nil
+	return users_id, nil
 }
-func (s *UserStore) GetFriendByDirectID(direct_id int) (int, error) {
-	var friend_id int
-	query := `SELECT friend_id FROM directs WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, direct_id).Scan(&friend_id)
+func (s *UserStore) GetChatID(user_first int, user_second int) (int, error) {
+	var chat_id int
+	query := `SELECT id FROM chat WHERE user_first = $1 AND user_second = $2;`
+	err := s.db.QueryRow(context.Background(), query, user_first, user_second).Scan(&chat_id)
 	if err != nil {
 		return 0, err
 	}
-	return friend_id, nil
-}
-func (s *UserStore) GetDirectID(user_id int, friend_id int) (int, error) {
-	var direct_id int
-	query := `SELECT id FROM directs WHERE user_id = $1 AND friend_id = $2;`
-	err := s.db.QueryRow(context.Background(), query, user_id, friend_id).Scan(&direct_id)
-	if err != nil {
-		return 0, err
-	}
-	return direct_id, nil
+	return chat_id, nil
 }
 func (s *UserStore) ExploreUsers(user_id int) ([]models.User, error) {
 	var users []models.User
@@ -502,7 +493,7 @@ func (s *UserStore) GetAllPostsByUserID(user_id int) ([]models.Post, error) {
 }
 func (s *UserStore) GetAllMessages() ([]models.Messages, error) {
 	var messages []models.Messages
-	query := `SELECT id, receiver_id, sender_id, content FROM messages;`
+	query := `SELECT id, chat_id, sender_id, content FROM messages;`
 	rows, err := s.db.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
@@ -510,7 +501,7 @@ func (s *UserStore) GetAllMessages() ([]models.Messages, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var message models.Messages
-		err := rows.Scan(&message.ID, &message.SenderID, &message.ReceiverID, &message.Content)
+		err := rows.Scan(&message.ID, &message.ChatID, &message.SenderID,  &message.Content)
 		if err != nil {
 			return nil, err
 		}
@@ -518,16 +509,16 @@ func (s *UserStore) GetAllMessages() ([]models.Messages, error) {
 	}
 	return messages, nil
 }
-func (s *UserStore) CreateMessage(sender_id int, receiver_id int, content string) error {
-	query := `INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3);`
-	_, err := s.db.Exec(context.Background(), query, sender_id, receiver_id, content)
+func (s *UserStore) CreateMessage(chat_id int, sender_id int, content string) error {
+	query := `INSERT INTO messages (chat_id, sender_id, content) VALUES ($1, $2, $3);`
+	_, err := s.db.Exec(context.Background(), query, chat_id, sender_id, content) 
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func (s *UserStore) DeleteMessage(message_id int) error {
-	query := `DELETE FROM messages WHERE id = $1;`
+	query := `DELETE * FROM messages WHERE id = $1;`
 	_, err := s.db.Exec(context.Background(), query, message_id)
 	if err != nil {
 		return err
@@ -536,8 +527,8 @@ func (s *UserStore) DeleteMessage(message_id int) error {
 }
 func (s *UserStore) GetMessageById(message_id int) (models.Messages, error) {
 	var message models.Messages
-	query := `SELECT id, sender_id, receiver_id, content FROM messages WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, message_id).Scan(&message.ID, &message.SenderID, &message.ReceiverID, &message.Content)
+	query := `SELECT id, sender_id, content FROM messages WHERE id = $1;`
+	err := s.db.QueryRow(context.Background(), query, message_id).Scan(&message.ID, &message.ChatID, &message.SenderID, &message.Content)
 	if err != nil {
 		return models.Messages{}, err
 	}
