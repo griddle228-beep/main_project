@@ -38,14 +38,15 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 
 	// /explore
 	r.GET("/getpostbyid/:id", h.GetPostById)
-	r.GET("/userbeusername", h.GetUserByUsername)
-	r.GET("/getpostsbyid/:id", h.GetPostsById)
+	r.GET("/getuserbyusername/:username", h.GetUserByUsername)
+	r.GET("/getpostsbyid/:id", h.GetPostsByUserId)
 
 	// /settings
 
-	// / direct_messege
-
+	// / Chats
+	r.GET("/deletechatbyid/:id", h.DeleteChatById)
 	// /friends
-	r.GET("/friends/:id", h.GetAllFriends)	// /Notifications
+	r.GET("/friends/:id", h.GetAllFriends)	
+	// /Notifications
 	r.GET("/notifications", h.GetAllNotifications)
 }

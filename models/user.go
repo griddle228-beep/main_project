@@ -1,4 +1,5 @@
 package models
+
 type User struct {
 	ID        int    `json:"id"`
 	UserName  string `json:"user_name"`
@@ -7,10 +8,10 @@ type User struct {
 	Password  string `json:"password"`
 }
 type Comment struct {
-	ID        int    `json:"id"`
-	PostID    int    `json:"post_id"`
-	UserID    int    `json:"user_id"`
-	Content   string `json:"content"`
+	ID      int    `json:"id"`
+	PostID  int    `json:"post_id"`
+	UserID  int    `json:"user_id"`
+	Content string `json:"content"`
 }
 type Post struct {
 	ID      int    `json:"id"`
@@ -27,23 +28,24 @@ type Friend struct {
 	UserID   int `json:"user_id"`
 	FriendID int `json:"friend_id"`
 }
+type Chat struct {
+	ID         int `json:"id"`
+	UserFirst  int `json:"user_first"`
+	UserSecond int `json:"user_second"`
+}
 type Messages struct {
-	ID        int    `json:"id"`
-	SenderID  int    `json:"sender_id"`
-	ReceiverID int   `json:"receiver_id"`
-	Content   string `json:"content"`
+	ID         int    `json:"id"`
+	ChatID     int    `json:"chat_id"`
+	SenderID   int    `json:"sender_id"`
+	ReceiverID int    `json:"receiver_id"`
+	Content    string `json:"content"`
 }
 type DirectMessage struct {
-	ID        int    `json:"id"`
-	ChatID    int    `json:"chat_id"`
-	SenderID  int    `json:"sender_id"`
-	ReceiverID int   `json:"receiver_id"`
-	Content   string `json:"content"`
-}
-type Direct struct {
-	ID       int `json:"id"`
-	UserID   int `json:"user_id"`
-	FriendID int `json:"friend_id"`
+	ID         int    `json:"id"`
+	ChatID     int    `json:"chat_id"`
+	SenderID   int    `json:"sender_id"`
+	ReceiverID int    `json:"receiver_id"`
+	Content    string `json:"content"`
 }
 type Subscription struct {
 	ID     int `json:"id"`

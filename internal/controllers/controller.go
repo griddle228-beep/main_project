@@ -35,7 +35,7 @@ func (h *Handlers) GetAllUsers(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("ОШИБКА в GetAllUsers: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve users"})
+			"error": "Failed to retrieve users"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"users": аllUsers})
@@ -92,14 +92,14 @@ func (h *Handlers) CreatePost(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
-	if strings.TrimSpace(post.Content) == ""{
+	if strings.TrimSpace(post.Content) == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Content не может быть пустым"})
 		return
 	}
 	if err := h.DbPool.CreatePost(post.UserID, post.Content); err != nil {
 		log.Printf("ОШИБКА в CreatePost: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to create post"})
+			"error": "Failed to create post"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
@@ -157,20 +157,18 @@ func (h *Handlers) GetAllDirects(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"Directs": аllDirects})
 }
 func (h *Handlers) CreateDirect(ctx *gin.Context) {
-	var direct models.Direct
-	if err := ctx.BindJSON(&direct); err != nil {
+	var chat models.Chat
+	if err := ctx.BindJSON(&chat); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
-	if err := h.DbPool.CreateDirect(direct.UserID, direct.FriendID); err != nil {
-		log.Printf("ОШИБКА в CreateDirect: %v", err)
+	if err := h.DbPool.CreateChat(chat.UserFirst, chat.UserSecond); err != nil {
+		log.Printf("ОШИБКА в Createchat: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to create direct",
-			"details": err.Error(),
-		})
+			"error": "Failed to create chat"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Direct created successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "chat created successfully"})
 }
 func (h *Handlers) GetAllMessages(ctx *gin.Context) {
 	аllMessages, err := h.DbPool.GetAllMessages()
@@ -309,32 +307,28 @@ func (h *Handlers) DeleteLike(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID должен быть числом"})
 		return
 	}
-	like, err := h.DbPool.GetLikeById(id)
-	if err != nil {
-		log.Printf("ОШИБКА в GetLikeById: %v", err)
+	if err := h.DbPool.DeleteLikeById(id); err != nil {
+		log.Printf("ОШИБКА в DeleteLikeById: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve like"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"Like": like})
+	ctx.JSON(http.StatusOK, gin.H{})
 }
-func (h *Handlers) DeleteDirect(ctx *gin.Context) {
+func (h *Handlers) DeleteChatById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID должен быть числом"})
 		return
 	}
-	direct, err := h.DbPool.GetDirectById(id)
-	if err != nil {
-		log.Printf("ОШИБКА в GetDirectById: %v", err)
+	if err := h.DbPool.DeleteChatById(id); err != nil {
+		log.Printf("ОШИБКА в DeletechatById: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve direct",
-			"details": err.Error(),
-		})
+			"error": "Failed to delete chat"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"Direct": direct})
+	ctx.JSON(http.StatusOK, gin.H{})
 }
 func (h *Handlers) DeleteFriend(ctx *gin.Context) {
 	idStr := ctx.Param("id")
@@ -501,7 +495,7 @@ func (h *Handlers) GetUserByUsername(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"User": user})
 }
-func (h *Handlers) GetPostsById(ctx *gin.Context) {
+func (h *Handlers) GetPostsByUserId(ctx *gin.Context) {
 	idParam := ctx.Param("id")
 	userID, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -520,14 +514,3 @@ func (h *Handlers) GetPostsById(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"posts": posts})
 }
-
-	
-
-
-
-
-
-
-
-
-
