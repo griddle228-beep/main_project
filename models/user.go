@@ -25,27 +25,25 @@ type Like struct {
 }
 type Friend struct {
 	ID       int `json:"id"`
-	UserID   int `json:"user_id"`
-	FriendID int `json:"friend_id"`
+	UserFirst   int `json:"user_first"`
+	FriendSecond int `json:"user_second"`
 }
 type Chat struct {
 	ID         int `json:"id"`
 	UserFirst  int `json:"user_first"`
 	UserSecond int `json:"user_second"`
 }
-type Messages struct {
+type Message struct {
 	ID         int    `json:"id"`
 	ChatID     int    `json:"chat_id"`
 	SenderID   int    `json:"sender_id"`
 	Content    string `json:"content"`
+	ReadMark   bool   `json:"mark_read"`
 }
-type Subscription struct {
-	ID     int `json:"id"`
-	UserID int `json:"user_id"`
-}
-type Subscriber struct {
-	ID     int `json:"id"`
-	UserID int `json:"user_id"`
+type following struct {
+	ID     		int `json:"id"`
+	FollowerId 	int `json:"follower_id"`
+	UserID 		int `json:"user_id"`
 }
 type Notification struct {
 	ID      int    `json:"id"`
@@ -57,4 +55,9 @@ type UserPublic struct {
 	UserName  string `json:"user_name"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+}
+type Followers struct {
+	ID     		int `json:"id"`
+	FollowerID 	int `json:"follower_id"`
+	UserID 		int `json:"user_id"`
 }

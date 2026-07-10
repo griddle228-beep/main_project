@@ -7,46 +7,79 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
+// user
+	r.("/getallusers", h.)
+	r.("/searchusers", h.)
+	r.("/follow", h.)
+	r.("/getuserbyid", h.)
+	r.("/getuserbynickname", h.)
+	r.("/getuserbyfirstname", h.)
+	r.("/getuserbylastname", h.)
+	r.("/getallfollowed", h.)
+	r.("/getallfollowings", h.)
+	r.("/getallfriends", h.)
+// post
+	r.("/createpost", h.)
+	r.("/getallposts", h.)
+	r.("/getpostbyid", h.)
+	r.("/getalluserposts", h.)
+	r.("/deletepost", h.)
+	r.("/updatepost", h.)
+// like
+	r.("/likepost", h.)
+	r.("/deletelike", h.)
+	r.("/countlikes", h.)
+	r.("/getalllikes", h.)
+// comment
+	r.("/createcomment", h.)
+	r.("/deletecomment", h.)
+	r.("/updatecomment", h.)
+	r.("/getallcomments", h.)
+	r.("/getcountcomments", h.)
+// chat
+	r.("/createchat", h.)
+	r.("/sendmessage", h.)
+	r.("/getallchats", h.)
+	r.("/deletemessage", h.)
+	r.("/deletechat", h.)
+	r.("/getallmessages", h.)
+	r.("/getmarkread", h.)
+	r.("/getcountnotreadmessage", h.)
+// notification
+	r.("/getallnotifications", h.)
+	r.("/getnotification", h.)
+	r.("/createnotification", h.)
+	r.("/deletenotification", h.)
+// authentication
+	r.("/register", h.)
+	r.("/login", h.)
+	r.("/refreshtoken", h.)
+	r.("/logout", h.)
 
-	r.GET("/getallusers", h.GetAllUsers)
 
 
-	// /auth
-	r.POST("/authentication", h.Authentication)
+
+
+
 	// /create_user
-	r.POST("/createuser", h.CreateUser)
+
 	// /create_post
-	r.POST("/createpost", h.CreatePost)
-	r.POST("/deletepost", h.DeletePost)
-	r.POST("/updatepost", h.UpdatePost)
+	r.POST("/createpost/:id", h.CreatePost)
 	// /profile
 
 	// /feed
-	r.GET("/getallposts", h.GetAllPosts)
-	r.GET("/getalllikes", h.GetAllLikes)
-	r.GET("/getlikebyid/:id", h.GetLikeById)
-	r.GET("/getallcomments", h.GetAllComments)
-	r.GET("/getcommentbyid/:id", h.GetCommentById)
-	r.GET("/getcountlikes/:id", h.GetCountLikes)
-	r.POST("/createlike", h.CreateLike) 
-	r.POST("/deletelike", h.DeleteLike) 
-	r.POST("/deletecomment", h.DeleteComment) 
-	r.POST("/createcomment", h.CreateComment) 
+
 	// /profile
-	r.GET("/getuserbyid/:id", h.GetUserById)
 	// /activity
 
 	// /explore
-	r.GET("/getpostbyid/:id", h.GetPostById)
-	r.GET("/getuserbyusername/:username", h.GetUserByUsername)
-	r.GET("/getpostsbyid/:id", h.GetPostsByUserId)
+
 
 	// /settings
 
 	// / Chats
-	r.GET("/deletechatbyid/:id", h.DeleteChatById)
+
 	// /friends
-	r.GET("/getallfriends/:id", h.GetAllFriends)	
+
 	// /Notifications
-	r.GET("/notifications", h.GetAllNotifications)
 }

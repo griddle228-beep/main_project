@@ -7,15 +7,119 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UserStore struct {
+type Store struct {
 	db *pgxpool.Pool
 }
 
-func NewUserStore(db *pgxpool.Pool) *UserStore {
-	return &UserStore{db: db}
+func NewStore(db *pgxpool.Pool) *Store {
+	return &Store{db: db}
 }
 
-func (u *UserStore) GetAllUsers() ([]models.User, error) {
+// user
+func (u *Store) CreateUser() {
+}
+func (u *Store) GetUserById() {
+}
+func (u *Store) GetUserByUsername() {
+}
+func (u *Store) UpdateUser() {
+}
+func (u *Store) ChangePassword() {
+}
+func (u *Store) DeleteUser() {
+}
+func (u *Store) SearchUsers() {
+}
+func (u *Store) FollowUser() {
+}
+func (u *Store) UnFollowUser() {
+}
+func (u *Store) DeleteFriend() {
+}
+func (u *Store) GetAllFriends() {
+}
+func (u *Store) GetAllFollowers() {
+}
+func (u *Store) GetAllFollowings() {
+}
+
+// like
+func (u *Store) LikePost() {
+}
+func (u *Store) DeleteLike() {
+}
+func (u *Store) Countlikes() {
+}
+func (u *Store) AllLikes() {
+}
+
+// comment
+func (u *Store) CreateComment() {
+}
+func (u *Store) DeleteComment() {
+}
+func (u *Store) UpdateComment() {
+}
+func (u *Store) GetAllComments() {
+}
+func (u *Store) GetCountComments() {
+}
+
+// chat
+func (u *Store) CreateChat() {
+}
+func (u *Store) SendMessage() {
+}
+func (u *Store) GetAllChats() {
+}
+func (u *Store) DeleteMessage() {
+}
+func (u *Store) DeleteChat() {
+}
+func (u *Store) GetAllMessages() {
+}
+func (u *Store) GetMarkRead() {
+}
+
+// notification
+func (u *Store) GetAllNotifications() {
+}
+func (u *Store) GetNotification() {
+}
+func (u *Store) CreateNotification() {
+}
+func (u *Store) DeleteNotification() {
+}
+
+// authentication
+func (u *Store) SaveRefreshToken() {
+}
+func (u *Store) DeleteRefreshToken() {
+}
+func (u *Store) GetRefreshToken() {
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func (u *Store) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 
 	query := `
@@ -36,7 +140,7 @@ func (u *UserStore) GetAllUsers() ([]models.User, error) {
 	}
 	return users, nil
 }
-func (s *UserStore) CreateUser(u models.User) (*models.User, error) {
+func (s *Store) CreateUser(u models.User) (*models.User, error) {
 	query := `
 	INSERT INTO users (user_name, first_name, last_name, password)
 	VALUES ($1, $2, $3, $4)
@@ -59,7 +163,7 @@ func (s *UserStore) CreateUser(u models.User) (*models.User, error) {
 	}
 	return createdUser, nil
 }
-func (s *UserStore) GetUserByUsername(username string) (*models.User, error) {
+func (s *Store) GetUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	query := `SELECT id, user_name, first_name, last_name, password FROM users WHERE user_name = $1`
 
@@ -75,7 +179,7 @@ func (s *UserStore) GetUserByUsername(username string) (*models.User, error) {
 	}
 	return &user, nil
 }
-func (s *UserStore) GetUserById(id int) (*models.User, error) {
+func (s *Store) GetUserById(id int) (*models.User, error) {
 	var user models.User
 	query := `SELECT id, user_name, first_name, last_name, password FROM users WHERE id = $1`
 
@@ -91,7 +195,7 @@ func (s *UserStore) GetUserById(id int) (*models.User, error) {
 	}
 	return &user, nil
 }
-func (s *UserStore) AddFriend(user_id int, friend_id int) error {
+func (s *Store) AddFriend(user_id int, friend_id int) error {
 	query := `INSERT INTO friends (user_id, friend_id) VALUES ($1, $2);`
 	_, err := s.db.Exec(context.Background(), query, user_id, friend_id)
 	if err != nil {
@@ -99,7 +203,7 @@ func (s *UserStore) AddFriend(user_id int, friend_id int) error {
 	}
 	return nil
 }
-func (s *UserStore) DeleteFriend(user_id int, friend_id int) error {
+func (s *Store) DeleteFriend(user_id int, friend_id int) error {
 	query := `DELETE FROM friends WHERE user_id = $1 AND friend_id = $2;`
 	_, err := s.db.Exec(context.Background(), query, user_id, friend_id)
 	if err != nil {
@@ -107,7 +211,7 @@ func (s *UserStore) DeleteFriend(user_id int, friend_id int) error {
 	}
 	return nil
 }
-func (s *UserStore) GetFriendId(user_id int) ([]int, error) {
+func (s *Store) GetFriendId(user_id int) ([]int, error) {
 	var friend_id []int
 	query := `SELECT friend_id FROM friends WHERE user_id = $1;`
 	rows, err := s.db.Query(context.Background(), query, user_id)
@@ -125,7 +229,7 @@ func (s *UserStore) GetFriendId(user_id int) ([]int, error) {
 	}
 	return friend_id, nil
 }
-func (s *UserStore) AddPost(user_id int, content string) error {
+func (s *Store) AddPost(user_id int, content string) error {
 	query := `INSERT INTO posts (user_id, content) VALUES ($1, $2);`
 	_, err := s.db.Exec(context.Background(), query, user_id, content)
 	if err != nil {
@@ -133,7 +237,7 @@ func (s *UserStore) AddPost(user_id int, content string) error {
 	}
 	return nil
 }
-func (s *UserStore) GetAllPosts() ([]models.Post, error) {
+func (s *Store) GetAllPosts() ([]models.Post, error) {
 	var posts []models.Post
 	query := `SELECT id, user_id, content FROM posts;`
 	rows, err := s.db.Query(context.Background(), query)
@@ -150,529 +254,4 @@ func (s *UserStore) GetAllPosts() ([]models.Post, error) {
 		posts = append(posts, post)
 	}
 	return posts, nil
-}
-func (s *UserStore) GetAllComments() ([]models.Comment, error) {
-	var comments []models.Comment
-	query := `SELECT id, post_id, user_id, content FROM comments;`
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var comment models.Comment
-		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content)
-		if err != nil {
-			return nil, err
-		}
-		comments = append(comments, comment)
-	}
-	return comments, nil
-}
-func (s *UserStore) CreateComment(post_id int, user_id int, content string) error {
-	query := `INSERT INTO comments (post_id, user_id, content) VALUES ($1, $2, $3);`
-	_, err := s.db.Exec(context.Background(), query, post_id, user_id, content)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) DeleteComment(comment_id int) error {
-	query := `DELETE FROM comments WHERE id = $1;`
-	_, err := s.db.Exec(context.Background(), query, comment_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) GetUserPostsId(user_id int) ([]int, error) {
-	var post_id []int
-	query := `SELECT id FROM posts WHERE user_id = $1;`
-	rows, err := s.db.Query(context.Background(), query, user_id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id int
-		err := rows.Scan(&id)
-		if err != nil {
-			return nil, err
-		}
-		post_id = append(post_id, id)
-	}
-	return post_id, nil
-}
-func (s *UserStore) CreateLike(post_id int, user_id int) error {
-	query := `INSERT INTO likes (post_id, user_id) VALUES ($1, $2); ON CONFLICT DO NOTHING;`
-	_, err := s.db.Exec(context.Background(), query, post_id, user_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) DeleteLike(post_id int, user_id int) error {
-	query := `DELETE FROM likes WHERE post_id = $1 AND user_id = $2;`
-	_, err := s.db.Exec(context.Background(), query, post_id, user_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) GetAllLikes() ([]models.Like, error) {
-	var likes []models.Like
-	query := `SELECT post_id, user_id FROM likes;`
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var like models.Like
-		err := rows.Scan(&like.PostID, &like.UserID)
-		if err != nil {
-			return nil, err
-		}
-		likes = append(likes, like)
-	}
-	return likes, nil
-}
-func (s *UserStore) GetCountLikes(post_id int) (int, error) {
-	var count int
-	query := `SELECT COUNT(*) FROM likes WHERE post_id = $1;`
-	err := s.db.QueryRow(context.Background(), query, post_id).Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-	return count, nil
-}
-func (s *UserStore) GetCountComments(post_id int) (int, error) {
-	var count int
-	query := `SELECT COUNT(*) FROM comments WHERE post_id = $1;`
-	err := s.db.QueryRow(context.Background(), query, post_id).Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-	return count, nil
-}
-func (s *UserStore) GetCountPosts(user_id int) (int, error) {
-	var count int
-	query := `SELECT COUNT(*) FROM posts WHERE user_id = $1;`
-	err := s.db.QueryRow(context.Background(), query, user_id).Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-	return count, nil
-}
-func (s *UserStore) CreatePost(user_id int, content string) error {
-	query := `INSERT INTO posts (user_id, content) VALUES ($1, $2);`
-	_, err := s.db.Exec(context.Background(), query, user_id, content)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) DeletePost(post_id int) error {
-	query := `DELETE FROM posts WHERE id = $1;`
-	_, err := s.db.Exec(context.Background(), query, post_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) GetAllDirects() ([]models.Chat, error) {
-	var chats []models.Chat
-	query := `SELECT id, user_first, user_second FROM chat;`
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var chat models.Chat
-		err := rows.Scan(&chat.ID, &chat.UserFirst, &chat.UserSecond)
-		if err != nil {
-			return nil, err
-		}
-		chats = append(chats, chat)
-	}
-	return chats, nil
-}
-func (s *UserStore) CreateChat(user_first int, user_second int) error {
-	query := `INSERT INTO Chat (user_first, user_second) VALUES ($1, $2);`
-	_, err := s.db.Exec(context.Background(), query, user_first, user_second)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) DeleteDirect(direct_id int) error {
-	query := `DELETE FROM directs WHERE id = $1;`
-	_, err := s.db.Exec(context.Background(), query, direct_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) GetUsersByChatID(chat_id int) (models.Chat, error) {
-	var users_id models.Chat
-	query := `SELECT user_first, user_second  FROM chat WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, chat_id).Scan(&users_id.UserFirst, &users_id.UserSecond)
-	if err != nil {
-		return models.Chat{}, err
-	}
-	return users_id, nil
-}
-func (s *UserStore) GetChatID(user_first int, user_second int) (int, error) {
-	var chat_id int
-	query := `SELECT id FROM chat WHERE user_first = $1 AND user_second = $2;`
-	err := s.db.QueryRow(context.Background(), query, user_first, user_second).Scan(&chat_id)
-	if err != nil {
-		return 0, err
-	}
-	return chat_id, nil
-}
-func (s *UserStore) ExploreUsers(user_id int) ([]models.User, error) {
-	var users []models.User
-	query := `SELECT id, user_name FROM users WHERE id != $1;`
-	rows, err := s.db.Query(context.Background(), query, user_id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var user models.User
-		err := rows.Scan(&user.ID, &user.UserName)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, user)
-	}
-	return users, nil
-}
-func (s *UserStore) ExploreGlobalPosts() ([]models.Post, error) {
-	var posts []models.Post
-	query := `SELECT id, user_id,  content FROM posts;`
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Content)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-	return posts, nil
-}
-func (s *UserStore) GetAllSubscriptions() ([]models.Subscription, error) {
-	var subscriptions []models.Subscription
-	query := `SELECT id, user_id FROM subscriptions;`
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var subscription models.Subscription
-		err := rows.Scan(&subscription.ID, &subscription.UserID)
-		if err != nil {
-			return nil, err
-		}
-		subscriptions = append(subscriptions, subscription)
-	}
-	return subscriptions, nil
-}
-func (s *UserStore) CreateSubscription(user_id int) error {
-	query := `INSERT INTO subscriptions (user_id) VALUES ($1);`
-	_, err := s.db.Exec(context.Background(), query, user_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) DeleteSubscription(subscription_id int) error {
-	query := `DELETE FROM subscriptions WHERE id = $1;`
-	_, err := s.db.Exec(context.Background(), query, subscription_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) GetUserBySubscriptionID(subscription_id int) (int, error) {
-	var user_id int
-	query := `SELECT user_id FROM subscriptions WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, subscription_id).Scan(&user_id)
-	if err != nil {
-		return 0, err
-	}
-	return user_id, nil
-}
-func (s *UserStore) GetAllSubscribers() ([]models.Subscriber, error) {
-	var subscribers []models.Subscriber
-	query := `SELECT id, user_id FROM subscribers;`
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var subscriber models.Subscriber
-		err := rows.Scan(&subscriber.ID, &subscriber.UserID)
-		if err != nil {
-			return nil, err
-		}
-		subscribers = append(subscribers, subscriber)
-	}
-	return subscribers, nil
-
-}
-func (s *UserStore) CreateSubscriber(user_id int) error {
-	query := `INSERT INTO subscribers (user_id) VALUES ($1);`
-	_, err := s.db.Exec(context.Background(), query, user_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) DeleteSubscriber(subscriber_id int) error {
-	query := `DELETE FROM subscribers WHERE id = $1;`
-	_, err := s.db.Exec(context.Background(), query, subscriber_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) GetUserBySubscriberID(subscriber_id int) (int, error) {
-	var user_id int
-	query := `SELECT user_id FROM subscribers WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, subscriber_id).Scan(&user_id)
-	if err != nil {
-		return 0, err
-	}
-	return user_id, nil
-}
-func (s *UserStore) GetActivity(user_id int) ([]models.Post, error) {
-	var posts []models.Post
-	query := `SELECT id, user_id, content FROM posts WHERE user_id = $1 OR id IN (SELECT post_id FROM comments WHERE user_id = $1);`
-	rows, err := s.db.Query(context.Background(), query, user_id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Content)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-	return posts, nil
-}
-func (s *UserStore) GetAllPostsByUserID(user_id int) ([]models.Post, error) {
-	var posts []models.Post
-	query := `SELECT id, user_id, content FROM posts WHERE user_id = $1;`
-	rows, err := s.db.Query(context.Background(), query, user_id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Content)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-	return posts, nil
-}
-func (s *UserStore) GetAllMessages() ([]models.Messages, error) {
-	var messages []models.Messages
-	query := `SELECT id, chat_id, sender_id, content FROM messages;`
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var message models.Messages
-		err := rows.Scan(&message.ID, &message.ChatID, &message.SenderID,  &message.Content)
-		if err != nil {
-			return nil, err
-		}
-		messages = append(messages, message)
-	}
-	return messages, nil
-}
-func (s *UserStore) CreateMessage(chat_id int, sender_id int, content string) error {
-	query := `INSERT INTO messages (chat_id, sender_id, content) VALUES ($1, $2, $3);`
-	_, err := s.db.Exec(context.Background(), query, chat_id, sender_id, content) 
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) DeleteMessage(message_id int) error {
-	query := `DELETE * FROM messages WHERE id = $1;`
-	_, err := s.db.Exec(context.Background(), query, message_id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) GetMessageById(message_id int) (models.Messages, error) {
-	var message models.Messages
-	query := `SELECT id, sender_id, content FROM messages WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, message_id).Scan(&message.ID, &message.ChatID, &message.SenderID, &message.Content)
-	if err != nil {
-		return models.Messages{}, err
-	}
-	return message, nil
-}
-func (s *UserStore) GetCommentById(comment_id int) (models.Comment, error) {
-	var comment models.Comment
-	query := `SELECT id, user_id, post_id, content FROM comments WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, comment_id).Scan(&comment.ID, &comment.UserID, &comment.PostID, &comment.Content)
-	if err != nil {
-		return models.Comment{}, err
-	}
-	return comment, nil
-}
-func (s *UserStore) GetAllCommentsByPostID(post_id int) ([]models.Comment, error) {
-	var comments []models.Comment
-	query := `SELECT id, user_id, post_id, content FROM comments WHERE post_id = $1;`
-	rows, err := s.db.Query(context.Background(), query, post_id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var comment models.Comment
-		err := rows.Scan(&comment.ID, &comment.UserID, &comment.PostID, &comment.Content)
-		if err != nil {
-			return nil, err
-		}
-		comments = append(comments, comment)
-	}
-	return comments, nil
-}
-func (s *UserStore) GetLikeById(like_id int) (models.Like, error) {
-	var like models.Like
-	query := `SELECT id, user_id, post_id FROM likes WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, like_id).Scan(&like.ID, &like.UserID, &like.PostID)
-	if err != nil {
-		return models.Like{}, err
-	}
-	return like, nil
-}
-func (s *UserStore) GetChatById(chat_id int) (models.Chat, error) {
-	var chat models.Chat
-	query := `SELECT id, user_first, user_second FROM chat WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, chat_id).Scan(&chat.ID, &chat.UserFirst, &chat.UserSecond)
-	if err != nil {
-		return models.Chat{}, err
-	}
-	return chat, nil
-}
-func (s *UserStore) DeleteChatById(chat_id int) (error) {
-	var chat models.Chat
-	query := `DELETE id, user_first, user_second FROM chat WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, chat_id).Scan(&chat.ID, &chat.UserFirst, &chat.UserSecond)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (s *UserStore) GetFriendById(friend_id int) (models.Friend, error) {
-	var friend models.Friend
-	query := `SELECT id, user_id, friend_id FROM friends WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, friend_id).Scan(&friend.ID, &friend.UserID, &friend.FriendID)
-	if err != nil {
-		return models.Friend{}, err
-	}
-	return friend, nil
-}
-func (s *UserStore) GetPostById(post_id int) (models.Post, error) {
-	var post models.Post
-	query := `SELECT id, user_id, content FROM posts WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, post_id).Scan(&post.ID, &post.UserID, &post.Content)
-	if err != nil {
-		return models.Post{}, err
-	}
-	return post, nil
-}
-func (s *UserStore) GetAllNotifications() ([]models.Notification, error) {
-	var notifications []models.Notification
-	query := `SELECT id, user_id, content FROM notifications;`
-	rows, err := s.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var notification models.Notification
-		err := rows.Scan(&notification.ID, &notification.UserID, &notification.Content)
-		if err != nil {
-			return nil, err
-		}
-		notifications = append(notifications, notification)
-	}
-	return notifications, nil
-}
-func (s *UserStore) GetAllPostsById(user_id int) ([]models.Post, error) {
-	var posts []models.Post
-	query := `SELECT id, user_id, content FROM posts WHERE user_id = $1;`
-	rows, err := s.db.Query(context.Background(), query, user_id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Content)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-	return posts, nil
-}
-func (s *UserStore) GetAllFriends(user_id int) ([]models.UserPublic, error) {
-	var friends []models.UserPublic
-
-	query := `
-	SELECT u.id, u.user_name, u.first_name, u.last_name
-	FROM users u
-	JOIN friends f ON u.id = f.friend_id
-	WHERE f.user_id = $1;
-	`
-	rows, err := s.db.Query(context.Background(), query, user_id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var friend models.UserPublic
-		err := rows.Scan(&friend.ID, &friend.UserName, &friend.FirstName, &friend.LastName)
-		if err != nil {
-			return nil, err
-		}
-		friends = append(friends, friend)
-	}
-	return friends, nil
-}
-func (s *UserStore) DeleteLikeById(like_id int) (error) {
-	var like models.Like
-	query := `DELETE id, user_id, post_id FROM likes WHERE id = $1;`
-	err := s.db.QueryRow(context.Background(), query, like_id).Scan(&like.ID, &like.UserID, &like.PostID)
-	if err != nil {
-		return err
-	}
-	return  nil
 }
