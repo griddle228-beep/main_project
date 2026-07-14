@@ -22,6 +22,16 @@ func (h *Handlers) GetUserByLastName(ctx *gin.Context) {
 }
 func (h *Handlers) GetUserByFullName(ctx *gin.Context) {
 }
+func (h *Handlers) FollowUser(ctx *gin.Context) {
+}
+func (h *Handlers) UnFollowUser(ctx *gin.Context) {
+}
+func (h *Handlers) GetAllFollowers(ctx *gin.Context) {
+}
+func (h *Handlers) GetAllFollowing(ctx *gin.Context) {
+}
+func (h *Handlers) GetAllFriends(ctx *gin.Context) {
+}
 // post
 func (h *Handlers) CreatePost(ctx *gin.Context) {
 }
@@ -73,15 +83,6 @@ func (h *Handlers) GetAllMessages(ctx *gin.Context) {
 func (h *Handlers) GetMarkRead(ctx *gin.Context) {
 }
 func (h *Handlers) GetCountNotReadMessage(ctx *gin.Context) {
-}
-// notification
-func (h *Handlers) GetAllNotifications(ctx *gin.Context) {
-}
-func (h *Handlers) GetNotification(ctx *gin.Context) {
-}
-func (h *Handlers) CreateNotification(ctx *gin.Context) {
-}
-func (h *Handlers) DeleteNotification(ctx *gin.Context) {
 }
 // authentication
 func (h *Handlers) Register(ctx *gin.Context) {

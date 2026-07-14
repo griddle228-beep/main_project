@@ -18,6 +18,7 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 	r.("/getallfollowed", h.)
 	r.("/getallfollowings", h.)
 	r.("/getallfriends", h.)
+	r.("/updateuser", h.)
 // post
 	r.("/createpost", h.)
 	r.("/getallposts", h.)
@@ -45,11 +46,6 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 	r.("/getallmessages", h.)
 	r.("/getmarkread", h.)
 	r.("/getcountnotreadmessage", h.)
-// notification
-	r.("/getallnotifications", h.)
-	r.("/getnotification", h.)
-	r.("/createnotification", h.)
-	r.("/deletenotification", h.)
 // authentication
 	r.("/register", h.)
 	r.("/login", h.)
@@ -61,25 +57,6 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 
 
 
-	// /create_user
 
-	// /create_post
 	r.POST("/createpost/:id", h.CreatePost)
-	// /profile
-
-	// /feed
-
-	// /profile
-	// /activity
-
-	// /explore
-
-
-	// /settings
-
-	// / Chats
-
-	// /friends
-
-	// /Notifications
 }

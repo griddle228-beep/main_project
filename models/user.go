@@ -26,7 +26,7 @@ type Like struct {
 type Friend struct {
 	ID       int `json:"id"`
 	UserFirst   int `json:"user_first"`
-	FriendSecond int `json:"user_second"`
+	UserSecond int `json:"user_second"`
 }
 type Chat struct {
 	ID         int `json:"id"`
@@ -44,11 +44,6 @@ type following struct {
 	ID     		int `json:"id"`
 	FollowerId 	int `json:"follower_id"`
 	UserID 		int `json:"user_id"`
-}
-type Notification struct {
-	ID      int    `json:"id"`
-	UserID  int    `json:"user_id"`
-	Content string `json:"content"`
 }
 type UserPublic struct {
 	ID        int    `json:"id"`
