@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type User struct {
 	ID        int    `json:"id"`
 	UserName  string `json:"user_name"`
@@ -38,12 +40,7 @@ type Message struct {
 	ChatID     int    `json:"chat_id"`
 	SenderID   int    `json:"sender_id"`
 	Content    string `json:"content"`
-	ReadMark   bool   `json:"mark_read"`
-}
-type following struct {
-	ID     		int `json:"id"`
-	FollowerId 	int `json:"follower_id"`
-	UserID 		int `json:"user_id"`
+	MarkRead   bool   `json:"mark_read"`
 }
 type UserPublic struct {
 	ID        int    `json:"id"`
@@ -55,4 +52,11 @@ type Followers struct {
 	ID     		int `json:"id"`
 	FollowerID 	int `json:"follower_id"`
 	UserID 		int `json:"user_id"`
+}
+type RefreshToken struct {
+	ID     		int 	`json:"id"`
+	UserID 		int 	`json:"user_id"`
+	TokenHash	string 	`json:"token_hash"` 
+	ExpiresAt	time.Time 	`json:"expires_at"`
+	CreatedAt	time.Time 	`json:"created_at"`
 }

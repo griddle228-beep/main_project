@@ -13,6 +13,8 @@ type Config struct {
 
 	PublicApiHost string `env:"PUBLIC_API_HOST"`       
 	PublicApiPort int `env:"PUBLIC_API_PORT,notEmpty" envDefault:"8080"`
+	
+	JWTSecret string `env:"JWT_SECRET,notEmpty"`
 
 	PG pgconn.DbConfig
 }

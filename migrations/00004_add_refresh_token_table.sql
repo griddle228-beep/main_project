@@ -1,10 +1,11 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS followers (
+CREATE TABLE IF NOT EXISTS refresh_tokens (
     id SERIAL PRIMARY KEY,
-    follower_id INT NOT NULL,
     user_id INT NOT NULL,
-    FOREIGN KEY (follower_id) REFERENCES users(id),
+    token_hash VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -12,5 +13,5 @@ CREATE TABLE IF NOT EXISTS followers (
  
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS follower;
+DROP TABLE IF EXISTS refresh_tokens;
 -- +goose StatementEnd

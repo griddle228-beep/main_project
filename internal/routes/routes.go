@@ -30,12 +30,13 @@ func SetupRoutes(r *gin.Engine, h *controller.Handlers) {
 	r.("/likepost", h.)
 	r.("/deletelike", h.)
 	r.("/countlikes", h.)
-	r.("/getalllikes", h.)
+	r.("/getallpostlikes", h.)
+	r.("/getalluserlikes", h.)
 // comment
 	r.("/createcomment", h.)
 	r.("/deletecomment", h.)
 	r.("/updatecomment", h.)
-	r.("/getallcomments", h.)
+	r.("/getallpostcomments", h.)
 	r.("/getcountcomments", h.)
 // chat
 	r.("/createchat", h.)

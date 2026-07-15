@@ -1,13 +1,64 @@
 package database
 
 import (
-	"context"
-	"semen_project/models"
+	"time"
+	"crypto/sha256"
+	"encoding/hex"
+	"crypto/rand"
+	"github.com/golang-jwt/jwt/v5"
+	"errors"
 )
+type Claims struct {
+	UserID int `json:"user_id"`
+	jwt.RegisteredClaims
+}
+func GenerateAccessToken(UserID int, secret string) (string, error) {
+	claims := Claims{
+	UserID: UserID,
+	RegisteredClaims: jwt.RegisteredClaims{
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+	},
+	}
+	secretKey := []byte(secret)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token_string, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
+	}
+	return token_string, nil
+}
+func GenerateRefreshToken() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+func ValidateAccessToken(TokenString string, secret string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(
+    TokenString,
+    claims,
+    func(token *jwt.Token) (interface{}, error) {
 
-func (u *Store) SaveRefreshToken() {
+        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+            return nil, errors.New("unexpected signing method")
+        }
+
+        return []byte(secret), nil
+    },
+)
+	if err != nil {
+		return nil, err
+	}
+	if !token.Valid {
+	    return nil, errors.New("invalid token")
+	}
+	return claims, nil
 }
-func (u *Store) DeleteRefreshToken() {
-}
-func (u *Store) GetRefreshToken() {
+func HashRefreshToken(token string) string {
+	hash := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(hash[:])
 }
