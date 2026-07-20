@@ -7,10 +7,10 @@ import (
 )
 
 func SetupMessageRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/sendmessage", h.)
-	r.("/updatemessage", h.)
-	r.("/deletemessage", h.)
-	r.("/getallmessages", h.)
-	r.("/updatemarkreadtoread", h.)
-	r.("/getcountnotreadmessage", h.)
+	r.POST("/chats/:id/messages", h.SendMessage)
+	r.PATCH("/messages/:id", h.UpdateMessage)
+	r.DELETE("/messages/:id", h.DeleteMessage)
+	r.GET("/chats/:id/messages", h.GetAllChatMessages)
+	r.PATCH("/messages/:id/status/read", h.UpdateMarkReadToRead)
+	r.GET("/chats/:id/messages/unread/count", h.GetCountNotReadMessages)
 }

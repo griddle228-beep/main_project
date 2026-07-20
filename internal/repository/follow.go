@@ -52,12 +52,12 @@ func (s *Store) GetAllUserFollowers(user_id int) ([]models.UserPublic, error) {
 	}	
 	return followers, nil
 }
-func (s *Store) GetAllUserFollowings(user_id int) ([]models.UserPublic, error) {
+func (s *Store) GetAllUserFollowing(user_id int) ([]models.UserPublic, error) {
 	var following_users []models.UserPublic
 	query := `
 	SELECT u.id, u.user_name, u.first_name, u.last_name
 	FROM followers f
-	JOIN users u ON f.user_id = users.id
+	JOIN users u ON f.user_id = u.id
 	WHERE f.follower_id = $1
 	`
 	rows, err := s.db.Query(context.Background(), query, user_id)
@@ -78,4 +78,43 @@ func (s *Store) GetAllUserFollowings(user_id int) ([]models.UserPublic, error) {
 	}	
 	return following_users, nil
 }
+func (s *Store) GetFollowStatus(userID int, followerID int) (bool, error) {
+	query := `
+	SELECT 1
+	FROM followers
+	WHERE user_id = $1 AND follower_id = $2
+	`
+	var exists int
+	err := s.db.QueryRow(context.Background(), query, userID, followerID).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+func (s *Store) GetCountFollowing(userID int) (int, error) {
+	query := `
+	SELECT COUNT(*)
+	FROM followers
+	WHERE follower_id = $1
+	`
+	var count int
+	err := s.db.QueryRow(context.Background(), query, userID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
 
+func (s *Store) GetCountFollowers(userID int) (int, error) {
+	query := `
+	SELECT COUNT(*)
+	FROM followers
+	WHERE user_id = $1
+	`
+	var count int
+	err := s.db.QueryRow(context.Background(), query, userID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}

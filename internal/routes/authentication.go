@@ -7,10 +7,11 @@ import (
 )
 
 func SetupPublicAuthenticationRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/register", h.)
-	r.("/login", h.)
-	r.("/refresh", h.)
+	r.POST("/register", h.Register)
+	r.POST("/login", h.Login)
+	r.POST("/refresh", h.Refresh)
 }
 func SetupPrivateAuthenticationRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/logout", h.)
+	r.POST("/logout", h.Logout)
+	r.POST("/logout/all-devices", h.LogoutAllDevicesExceptThis)
 }

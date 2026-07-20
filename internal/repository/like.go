@@ -6,7 +6,7 @@ import (
 
 )
 
-func (s *Store) LikePost(post_id int, user_id int) error {
+func (s *Store) CreateLike(post_id int, user_id int) error {
 	query := `
 	INSERT INTO likes (post_id, user_id)
 	VALUES ($1, $2)
@@ -17,23 +17,21 @@ func (s *Store) LikePost(post_id int, user_id int) error {
 	}
 	return nil
 }
-func (s *Store) DeleteLike(like_id int) error {
+func (s *Store) DeleteLike(postID int, userID int) error {
 	query := `
 	DELETE FROM likes
-	WHERE id = $1
+	WHERE post_id = $1 AND user_id = $2
 	`
-	_, err := s.db.Exec(context.Background(), query, like_id)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	_, err := s.db.Exec(context.Background(), query, postID, userID)
+	return err
 }
-func (s *Store) GetAllLUserLikes(user_id int) ([]models.Like, error) {
+func (s *Store) GetAllUserLikes(user_id int) ([]models.Like, error) {
 	var likes []models.Like
 	query := `
 	SELECT id, post_id, user_id
 	FROM likes
-	WHERE id = $1
+	WHERE user_id = $1
 	`
 	rows, err := s.db.Query(context.Background(),query, user_id)
 	if err != nil {
@@ -53,7 +51,7 @@ func (s *Store) GetAllLUserLikes(user_id int) ([]models.Like, error) {
 	}	
 	return likes, nil
 }
-func (s *Store) GetAllLPostLikes(post_id int) ([]models.Like, error)  {
+func (s *Store) GetAllPostLikes(post_id int) ([]models.Like, error)  {
 	var likes []models.Like
 	query := `
 	SELECT id, post_id, user_id
@@ -77,4 +75,34 @@ func (s *Store) GetAllLPostLikes(post_id int) ([]models.Like, error)  {
     return nil, err
 	}	
 	return likes, nil
+}
+func (s *Store) GetLikeStatus(postID int, userID int) (bool, error) {
+	query := `
+	SELECT 1
+	FROM likes
+	WHERE post_id = $1 AND user_id = $2
+	`
+
+	var exists int
+	err := s.db.QueryRow(context.Background(), query, postID, userID).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+func (s *Store) GetCountLikes(postID int) (int, error) {
+	query := `
+	SELECT COUNT(*)
+	FROM likes
+	WHERE post_id = $1
+	`
+
+	var count int
+	err := s.db.QueryRow(context.Background(), query, postID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }

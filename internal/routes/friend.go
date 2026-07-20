@@ -7,6 +7,8 @@ import (
 )
 
 func SetupFriendRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/getcountfriends", h.)
-	r.("/getallfriends", h.)
+	r.GET("/:id/friends", h.GetAllFriends)
+	r.GET("/friends", h.GetAllMyFriends)
+	r.GET("/:id/friends/count", h.GetCountFriends)
+	r.GET("/:id/friend-status", h.CheckFriendship)
 }

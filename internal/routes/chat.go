@@ -7,7 +7,8 @@ import (
 )
 
 func SetupChatRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/createchat", h.)
-	r.("/getalluserchats", h.)
-	r.("/deletechat", h.)
+	r.POST("/users/:id/chat", h.CreateChat)
+	r.GET("/chats", h.GetAllUserChats)
+	r.DELETE("/chats/:id", h.DeleteChat)
+	r.GET("/users/:id/chat", h.GetChatByUserID)
 }

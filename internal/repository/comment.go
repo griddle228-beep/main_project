@@ -6,12 +6,12 @@ import (
 
 )
 
-func (s *Store) CreateComment(c models.Comment) error{
+func (s *Store) CreateComment(postID int, userID int, content string) error{
 	query := `
 	INSERT INTO comments (post_id, user_id, content)
 	VALUES ($1, $2, $3)
 	`
-	_, err := s.db.Exec(context.Background(),query, c.PostID, c.UserID, c.Content)
+	_, err := s.db.Exec(context.Background(),query, postID, userID, content)
 	if err != nil {
 		return  err
 	}
@@ -19,7 +19,7 @@ func (s *Store) CreateComment(c models.Comment) error{
 }
 func (s *Store) DeleteComment(comment_id int) error {	
 	query := `
-	DELETE FROM comments WHERE user_id = $1 AND post_id = $2
+	DELETE FROM comments WHERE id = $1
 	`
 	_, err := s.db.Exec(context.Background(),query, comment_id)
 	if err != nil {
@@ -30,7 +30,7 @@ func (s *Store) DeleteComment(comment_id int) error {
 func (s *Store) UpdateComment(comment_id int,content string) error {
 	query := `
 	UPDATE comments
-	SET content = $1
+	SET content = $2
 	WHERE id = $1
 	`
 	_, err := s.db.Exec(context.Background(),query,comment_id, content)
@@ -42,9 +42,10 @@ func (s *Store) UpdateComment(comment_id int,content string) error {
 func (s *Store) GetAllPostComments(post_id int) ([]models.Comment, error) {
 	var comments []models.Comment
 	query := `
-	SELECT post_id, user_id, content
+	SELECT id, post_id, user_id, content
 	FROM comments
 	WHERE post_id = $1
+	ORDER By id DESC
 	`
 	rows, err := s.db.Query(context.Background(),query, post_id)
 	if err != nil {
@@ -53,7 +54,7 @@ func (s *Store) GetAllPostComments(post_id int) ([]models.Comment, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var comment models.Comment
-		err := rows.Scan(&comment.PostID, &comment.UserID, &comment.Content)
+		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content)
 		if err != nil {
 			return nil, err
 		}
@@ -63,4 +64,60 @@ func (s *Store) GetAllPostComments(post_id int) ([]models.Comment, error) {
     return nil, err
 	}	
 	return comments, nil
+}
+func (s *Store) GetCommentById(comment_id int) (models.Comment, error) {
+	query := `
+	SELECT id, post_id, user_id, content
+	FROM comments
+	WHERE id = $1
+	`
+	var comment models.Comment
+	err := s.db.QueryRow(context.Background(), query, comment_id).Scan( 
+	&comment.ID,
+    &comment.PostID,
+    &comment.UserID,
+    &comment.Content,)
+	if err != nil {
+		return models.Comment{}, err
+	}
+	return comment, nil
+}
+func (s *Store) GetAllUserCommentsUnderCurrentPost(postID int, userID int) ([]models.Comment, error) {
+	var comments []models.Comment
+	query := `
+	SELECT id, post_id, user_id, content
+	FROM comments
+	WHERE post_id = $1 and user_id = $2
+	ORDER BY id DESC
+	`
+	rows, err := s.db.Query(context.Background(),query, postID, userID)
+	if err != nil {
+		return  nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var comment models.Comment
+		err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Content)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+	if err := rows.Err(); err != nil {
+    return nil, err
+	}	
+	return comments, nil
+}
+func (s *Store) GetCountComments(postID int) (int, error) {
+	query := `
+	SELECT COUNT(*)
+	FROM comments
+	WHERE post_id = $1
+	`
+	var count int
+	err := s.db.QueryRow(context.Background(), query, postID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

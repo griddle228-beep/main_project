@@ -7,9 +7,10 @@ import (
 )
 
 func SetupLikeRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/likepost", h.)
-	r.("/deletelike", h.)
-	r.("/countlikes", h.)
-	r.("/getallpostlikes", h.)
-	r.("/getalluserlikes", h.)
+	r.POST("/posts/:id/like", h.LikePost)
+	r.DELETE("/posts/:id/like", h.DeleteLike)
+	r.GET("/posts/:id/likes/count", h.GetCountLikes)
+	r.GET("/posts/:id/likes", h.GetAllPostLikes)
+	r.GET("/users/:id/likes", h.GetAllUserLikes)
+	r.GET("/posts/:id/like-status", h.GetLikeStatus)
 }

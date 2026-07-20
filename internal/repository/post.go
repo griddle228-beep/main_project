@@ -20,12 +20,12 @@ func (s *Store) CreatePost(userId int, content string) (*models.Post, error)  {
 	if err != nil {
 		return nil, err
 	}
-	return post, err 
+	return post, nil 
 }
-func (s *Store) GetPostById(user_id int) (models.Post, error)  {
+func (s *Store) GetPostById(post_id int) (models.Post, error)  {
 	var post models.Post
 	query := `SELECT id, user_id, content FROM posts WHERE id = $1 `
-	err := s.db.QueryRow(context.Background(), query, user_id).Scan(&post.ID, &post.UserID, &post.Content)
+	err := s.db.QueryRow(context.Background(), query, post_id).Scan(&post.ID, &post.UserID, &post.Content)
 	if err != nil {
 		return models.Post{}, err
 	}
@@ -41,7 +41,7 @@ func (s *Store) DeletePost(post_id int) error {
 }
 func (s *Store) GetAllPosts() ([]models.Post, error)  {
 	var posts []models.Post
-	query := ` SELECT Id, user_id, content From posts`
+	query := ` SELECT Id, user_id, content From posts ORDER BY id DESC;`
 	rows, err := s.db.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (s *Store) GetAllPosts() ([]models.Post, error)  {
 }
 func (s *Store) GetAllUserPosts(user_id int) ([]models.Post, error) {
 	var posts []models.Post
-	query := `SELECT id, user_id, content FROM posts WHERE user_id = $1`
+	query := `SELECT id, user_id, content FROM posts WHERE user_id = $1 ORDER BY id DESC;`
 	rows, err := s.db.Query(context.Background(), query, user_id)
 	if err != nil {
 		return nil, err
@@ -81,15 +81,15 @@ func (s *Store) GetAllUserPosts(user_id int) ([]models.Post, error) {
 	}	
 	return posts, nil
 }
-func (s *Store) UpdatePost(p models.Post) (*models.Post, error)  {
+func (s *Store) UpdatePost(post_id int, content string) (*models.Post, error)  {
 	updatedpost := &models.Post{}
 	query := `
 	UPDATE posts
-	SET user_id = $2, content = $3
+	SET content = $2
 	WHERE id = $1
 	RETURNING id, user_id, content
 	`
-	err := s.db.QueryRow(context.Background(), query, p.ID, p.UserID, p.Content).Scan(
+	err := s.db.QueryRow(context.Background(), query, post_id, content).Scan(
 		&updatedpost.ID,
 		&updatedpost.UserID,
 		&updatedpost.Content,
@@ -110,7 +110,8 @@ func (s *Store) GetAllFriendsPosts(user_id int) ([]models.Post, error) {
  	   (f.user_first = $1 AND p.user_id = f.user_second)
   	  OR
   	  (f.user_second = $1 AND p.user_id = f.user_first)
-	);	
+	)
+	ORDER BY p.id DESC;	
 	`
 	rows, err := s.db.Query(context.Background(), query, user_id)
 	if err != nil {
@@ -130,7 +131,7 @@ func (s *Store) GetAllFriendsPosts(user_id int) ([]models.Post, error) {
 	}	
 	return posts, nil
 }
-func (s *Store) GetAllNotFriendsPosts(id int) ([]models.Post, error) {
+func (s *Store) GetAllNotFriendsPosts(user_id int) ([]models.Post, error) {
 	var posts []models.Post
 	query := `
 	SELECT p.id, p.user_id, p.content
@@ -143,9 +144,10 @@ func (s *Store) GetAllNotFriendsPosts(id int) ([]models.Post, error) {
 	        (f.user_first = $1 AND f.user_second = p.user_id)
 	        OR
 	        (f.user_second = $1 AND f.user_first = p.user_id)
-);
+	)
+	ORDER BY p.id DESC;
 	`
-	rows, err := s.db.Query(context.Background(), query, id)
+	rows, err := s.db.Query(context.Background(), query, user_id)
 	if err != nil {
 		return nil, err
 	}

@@ -1,148 +1,259 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
-	"semen_project/internal/models"
+	"semen_project/internal/dto/user_requests"
+	"semen_project/internal/repository"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 // user
-func (h *Handlers) GetUserById(ctx *gin.Context) {
-}
-func (h *Handlers) SearchUsers(ctx *gin.Context) {
-}
-func (h *Handlers) UpdateUser(ctx *gin.Context) {
-}
-func (h *Handlers) UpdatePassword(ctx *gin.Context) {
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-func (h *Handlers) CreateUser(ctx *gin.Context) {
-	var err error
-	var user models.User
-	if err = ctx.BindJSON(&user); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
+func (h *Handlers) GetMe(ctx *gin.Context) {
+	value, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userID не найден в контексте"})
+		return			
 	}
-	if strings.TrimSpace(user.UserName) == "" || strings.TrimSpace(user.Password) == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "UserName и Password не могут быть пустыми"})
-		return
-	}
-	createdUser, err := h.DbPool.CreateUser(user)
+	id := value.(int)
+	user, err := h.DbPool.GetUserById(id)
 	if err != nil {
-		log.Printf("ОШИБКА в CreateUser: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка в получении пользователя по id"})
+		return			
+	}
+	if user.ID == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"user": createdUser})
-}
-
-func (h *Handlers) GetAllUsers(ctx *gin.Context) {
-	аllUsers, err := h.DbPool.GetAllUsers()
-	if err != nil {
-		log.Printf("ОШИБКА в GetAllUsers: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to retrieve users"})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"users": аllUsers})
-}
-func (h *Handlers) Authentication(ctx *gin.Context) {
-	var loginData struct {
-		UserName string `json:"user_name"`
-		Password string `json:"password"`
-	}
-	if err := ctx.BindJSON(&loginData); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Неверный формат запроса"})
-		return
-	}
-	if strings.TrimSpace(loginData.UserName) == "" || strings.TrimSpace(loginData.Password) == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "UserName и Password не могут быть пустыми"})
-		return
-	}
-
-	user, err := h.DbPool.GetUserByUsername(loginData.UserName)
-	if err != nil {
-		log.Printf("ОШИБКА в GetUserByUsername: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
-		return
-	}
-
-	if user.Password != loginData.Password {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Неверные учётные данные"})
-		return
-	}
-
 	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }
-func (h *Handlers) GetAllFriends(ctx *gin.Context) {
+func (h *Handlers) UpdateUser(ctx *gin.Context) {
+	var updateUser dto.UpdateUserRequest
+	err := ctx.BindJSON(&updateUser)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка в request body"})
+		return		
+	}
+	value, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "userID не найден в контексте"})
+		return			
+	} 
+	id := value.(int)
+	LastUser, err := h.DbPool.GetUserById(id)
+	if err == pgx.ErrNoRows {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "пользователь не найден"})
+		return			
+	}
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении прошлых данных"})
+		return	
+	}
+
+	if strings.TrimSpace(updateUser.UserName) == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "UserName не может быть пустым"})
+		return			
+	}
+	if strings.TrimSpace(updateUser.UserName) == strings.TrimSpace(LastUser.UserName) &&
+	strings.TrimSpace(updateUser.FirstName) == strings.TrimSpace(LastUser.FirstName) &&
+	strings.TrimSpace(updateUser.LastName) == strings.TrimSpace(LastUser.LastName) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка, все новые данные совпадают с прошлыми"})
+		return		
+	}
+	usedUserName, err := h.DbPool.GetUserByUsernameExceptId(id, updateUser.UserName)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при проверке уникальности username"})
+		return
+	}
+	if usedUserName.ID != 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Пользователь с таким username уже существует"})
+		return
+	}
+	err = h.DbPool.UpdateUser(updateUser.UserName, updateUser.FirstName, updateUser.LastName, id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при обновлении данных пользователя"})
+		return		
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Пользователь успешно обновлен"})
+}
+func (h *Handlers) GetAllUsers(ctx *gin.Context) {
+	users, err := h.DbPool.GetAllUsers()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении всех пользователей"})
+		return
+	}
+	if len(users) == 0 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "Список пользователей пуст",
+			"users": users,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Список пользователей найден", "users": users})
+}
+func (h *Handlers) DeleteUser(ctx *gin.Context) {
+	var password dto.DeleteUserRequest
+	err := ctx.BindJSON(&password)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка в request body"})
+		return
+	}
+	if strings.TrimSpace(password.Password) == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Password не может быть пустым"})
+		return
+	}
+	value, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": " userID не найден в контексте"})
+		return
+	}
+	id := value.(int)
+
+	lastPassword, err := h.DbPool.GetPasswordById(id)
+	if err == pgx.ErrNoRows {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
+		return		
+	}
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка получении пароля по id"})
+		return		
+	}
+	err = repository.CheckPassword(lastPassword, password.Password)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный пароль"})
+		return	
+	}
+	err = h.DbPool.DeleteUser(id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при удалении пользователя"})
+		return			
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": " Пользователь успешно удален"})
+}
+func (h *Handlers) UpdatePassword(ctx *gin.Context) {
+	var passwords dto.UpdatePasswordRequest
+	err := ctx.BindJSON(&passwords)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка в request body"})
+		return
+	}
+	if strings.TrimSpace(passwords.LastPassword) == "" || strings.TrimSpace(passwords.NewPassword) == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "LastPassword и NewPassword не могут быть пустыми"})
+		return
+	}
+	if len(passwords.NewPassword) < 8 {
+	ctx.JSON(http.StatusBadRequest, gin.H{
+		"error": "Пароль должен содержать минимум 8 символов",
+	})
+	return
+	}
+	value, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": " userID не найден в контексте"})
+		return	
+	}
+	id := value.(int)
+
+	dbPassword, err := h.DbPool.GetPasswordById(id)
+	if err == pgx.ErrNoRows {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
+		return		
+	}
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось получить пароль из базы данных"})
+		return			
+	}
+
+	err = repository.CheckPassword(dbPassword, passwords.LastPassword)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный пароль"})
+		return	
+	}
+	err = repository.CheckPassword(dbPassword, passwords.NewPassword)
+	if err == nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Новый пароль совпадает с текущим"})
+		return
+	}
+	HashNewPassword, err := repository.HashPassword(passwords.NewPassword)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось захешировать новый пароль"})
+		return
+	}
+
+	err = h.DbPool.UpdatePassword(id, HashNewPassword)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось изменить пароль"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Пароль успешно изменен"})
+}
+func (h *Handlers) GetUserById(ctx *gin.Context) {
 	idParam := ctx.Param("id")
 	userID, err := strconv.Atoi(idParam)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "некорректный id"})
+		return		
+	}
+	if userID <= 0 {
+    ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный id"})
+    return
+	}
+	user, err := h.DbPool.GetUserById(userID)
+	if err == pgx.ErrNoRows {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "пользователь не найден"})
+		return			
+	}
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении пользователя"})
+		return		
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Пользователь найден", "user": user})
+}
+func (h *Handlers) SearchUsers(ctx *gin.Context) {
+	query := strings.TrimSpace(ctx.Query("query"))
+	if query == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Параметр query не может быть пустым"})
 		return
 	}
-
-	аllFriends, err := h.DbPool.GetAllFriends(userID)
+	if len(query) < 2 {
+    ctx.JSON(http.StatusBadRequest, gin.H{"error": "Минимум 2 символа для поиска"})
+    return
+	}
+	users, err := h.DbPool.SearchUsers(query)
 	if err != nil {
-		log.Printf("ОШИБКА в GetAllFriends: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to retrieve friends",
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при поиске пользователей"})
+		return
+	}
+	if len(users) == 0 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "Пользователи не найдены",
+			"users": users,
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"friends": аllFriends})
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Пользователи найдены",
+		"users": users,
+	})
 }
-func (h *Handlers) CreatePost(ctx *gin.Context) {
-	var post models.Post
-	if err := ctx.BindJSON(&post); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+func (h *Handlers) GetUserByUsername(ctx *gin.Context) {
+	username := ctx.Param("username")
+	if username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Параметр username не может быть пустым"})
 		return
 	}
-	if strings.TrimSpace(post.Content) == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Content не может быть пустым"})
+	user, err := h.DbPool.GetUserByUsername(username)
+	if err == pgx.ErrNoRows {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
 		return
 	}
-	if err := h.DbPool.CreatePost(post.UserID, post.Content); err != nil {
-		log.Printf("ОШИБКА в CreatePost: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to create post"})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
-}
-func (h *Handlers) GetAllPosts(ctx *gin.Context) {
-	аllPosts, err := h.DbPool.GetAllPosts()
 	if err != nil {
-		log.Printf("ОШИБКА в GetAllPosts: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve posts",
-			"details": err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении пользователя"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"Posts": аllPosts})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Пользователь найден", "user": user})
 }

@@ -67,3 +67,32 @@ func (s *Store) GetAllUserFriends(user_id int) ([]models.UserPublic, error) {
 	}
 	return users, nil
 }
+func (s *Store) GetCountFriends(userID int) (int, error) {
+	query := `
+	SELECT COUNT(*)
+	FROM friends
+	WHERE user_first = $1 OR user_second = $1;
+	`
+	var count int
+	err := s.db.QueryRow(context.Background(), query, userID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+func (s *Store) GetFriendship(userFirstID int, userSecondID int) (bool, error) {
+	if userFirstID > userSecondID {
+		userFirstID, userSecondID = userSecondID, userFirstID
+	}
+	query := `
+	SELECT 1
+	FROM friends
+	WHERE	user_first = $1 AND user_second = $2
+	`
+	var exists int
+	err := s.db.QueryRow(context.Background(), query, userFirstID, userSecondID).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

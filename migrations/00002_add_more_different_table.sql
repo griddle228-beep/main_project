@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS likes (
     post_id INT NOT NULL,
     user_id INT NOT NULL,
     FOREIGN KEY (post_id) REFERENCES posts(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(user_id, post_id)
 );
 CREATE TABLE IF NOT EXISTS chats (
     id SERIAL PRIMARY KEY,
@@ -42,10 +43,9 @@ CREATE TABLE IF NOT EXISTS messages (
     chat_id INT NOT NULL,
     sender_id INT NOT NULL,
     content VARCHAR(10000) NOT NULL,
-    mark_read BOOLEAN, DEFAULT false
-    FOREIGN KEY (chat_id) REFERENCES chat(id),
+    mark_read BOOLEAN DEFAULT false
+    FOREIGN KEY (chat_id) REFERENCES chats(id),
     FOREIGN KEY (sender_id) REFERENCES users(id),
-    FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
 
 
@@ -53,5 +53,5 @@ CREATE TABLE IF NOT EXISTS messages (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS chat, message, like, comment, post, friend;
+DROP TABLE IF EXISTS chats, messages, likes, comments, posts, friends;
 -- +goose StatementEnd

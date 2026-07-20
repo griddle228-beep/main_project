@@ -6,12 +6,25 @@ import (
 )
 
 
-func (s *Store) CreateChat(user_first_id int, user_seconf_id int) error {
+func (s *Store) GetChatById(chat_id int) (models.Chat, error) {
+	var chat models.Chat
+	query := `
+	SELECT id, user_first, user_second
+	FROM chats
+	WHERE id = $1
+	`
+	err := s.db.QueryRow(context.Background(), query, chat_id).Scan(&chat.ID, &chat.UserFirst, &chat.UserSecond)
+	if err != nil {
+		return models.Chat{}, err
+	}
+	return chat, nil
+}
+func (s *Store) CreateChat(user_first_id int, user_second_id int) error {
 	query := `
 	INSERT INTO chats (user_first, user_second)
 	VALUES ($1, $2)
 	`
-	_, err := s.db.Exec(context.Background(), query, user_first_id, user_seconf_id)
+	_, err := s.db.Exec(context.Background(), query, user_first_id, user_second_id)
 	if err != nil {
 		return err
 	}
@@ -37,6 +50,9 @@ func (s *Store) GetAllUserChats(user_id int) ([]models.Chat, error) {
 		}
 		chats = append(chats, chat)
 	}
+	if err := rows.Err(); err != nil {
+	return nil, err
+	}
 	return chats, nil
 }
 func (s *Store) DeleteChat(chat_id int) error {
@@ -49,4 +65,20 @@ func (s *Store) DeleteChat(chat_id int) error {
 		return err
 	}
 	return nil
+}
+func (s *Store) GetChatByUsersID(user_first_id int, user_second_id int) (models.Chat, error) {
+	if user_first_id > user_second_id {
+		user_first_id, user_second_id = user_second_id, user_first_id
+	}
+	var chat models.Chat
+	query := `
+	SELECT id, user_first, user_second
+	FROM chats
+	WHERE user_first = $1 AND user_second = $2
+	`
+	err := s.db.QueryRow(context.Background(), query, user_first_id, user_second_id).Scan(&chat.ID, &chat.UserFirst, &chat.UserSecond)
+	if err != nil {
+		return models.Chat{}, err
+	}
+	return chat, nil
 }

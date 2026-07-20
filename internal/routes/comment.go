@@ -7,9 +7,9 @@ import (
 )
 
 func SetupCommentRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/createcomment", h.)
-	r.("/deletecomment", h.)
-	r.("/updatecomment", h.)
-	r.("/getallpostcomments", h.)
-	r.("/getcountcomments", h.)
+	r.POST("/posts/:id/comments", h.CreateComment)
+	r.DELETE("/comments/:id", h.DeleteComment)
+	r.PATCH("/comments/:id", h.UpdateComment)
+	r.GET("/posts/:id/comments", h.GetAllPostComments)
+	r.GET("/posts/:id/comments/count", h.GetCountComments)
 }

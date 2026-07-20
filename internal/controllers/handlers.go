@@ -6,8 +6,9 @@ import (
 )
 type Handlers struct {
 	DbPool *repository.Store
+	Secret string
 }
 
-func NewHandlers(dbPool *pgxpool.Pool) *Handlers {
-	return &Handlers{DbPool: repository.NewStore(dbPool)}
+func NewHandlers(dbPool *pgxpool.Pool, secret string) *Handlers {
+	return &Handlers{DbPool: repository.NewStore(dbPool), Secret: secret}
 }

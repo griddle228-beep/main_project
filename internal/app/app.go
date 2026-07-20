@@ -30,7 +30,7 @@ func Run(cfg *config.Config) error {
 
 	slog.Info("PostgreSQL connection established")
 
-	handler := controllers.NewHandlers(dbPool)
+	handler := controllers.NewHandlers(dbPool, cfg.JWTSecret)
 
 	router := gin.Default()
 	routes.SetupRoutes(router, handler, cfg.JWTSecret)

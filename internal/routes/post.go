@@ -7,11 +7,11 @@ import (
 )
 
 func SetupPostRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/createpost", h.)
-	r.("/getfeed", h.)
-	r.("/getpostbyid", h.)
-	r.("/getalluserposts", h.)
-	r.("/getallposts", h.)
-	r.("/deletepost", h.)
-	r.("/updatepost", h.)
+	r.POST("/posts", h.CreatePost)
+	r.GET("/posts/:id", h.GetPostById)
+	r.GET("/feed", h.GetFeed)
+	r.GET("/users/:id/posts", h.GetAllUserPosts)
+	r.GET("/posts", h.GetAllPosts)
+	r.DELETE("/posts/:id", h.DeletePost)
+	r.PATCH("/posts/:id", h.UpdatePost)
 }

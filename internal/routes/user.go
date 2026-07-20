@@ -7,9 +7,12 @@ import (
 )
 
 func SetupUserRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-// user
-	r.("/getallusers", h.)
-	r.("/searchusers", h.)
-	r.("/updatepassword", h.)
-	r.("/updateuser", h.)
+	r.GET("/me", h.GetMe)
+	r.PUT("/user", h.UpdateUser)
+	r.GET("/users", h.GetAllUsers)
+	r.DELETE("/user", h.DeleteUser)
+	r.POST("/password", h.UpdatePassword)
+	r.GET("/user/:id", h.GetUserById)
+	r.GET("/users/search", h.SearchUsers)
+	r.GET("/user/:username", h.GetUserByUsername)
 }

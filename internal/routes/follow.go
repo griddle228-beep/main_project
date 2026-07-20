@@ -7,10 +7,11 @@ import (
 )
 
 func SetupFollowRoutes(r *gin.RouterGroup, h *controller.Handlers) {
-	r.("/followuser", h.)
-	r.("/unfollowuser", h.)
-	r.("/getallfollowers", h.)
-	r.("/getallfollowing", h.)
-	r.("/getcountfollowers", h.)
-	r.("/getcountfollowing", h.)
+	r.POST("/:id/follow", h.FollowUser)
+	r.DELETE("/:id/follow", h.UnFollowUser)
+	r.GET("/:id/followers", h.GetAllFollowers)
+	r.GET("/:id/following", h.GetAllFollowing)
+	r.GET("/:id/followers/count", h.GetCountFollowers)
+	r.GET("/:id/following/count", h.GetCountFollowing)
+	r.GET("/:id/follow-status", h.CheckFollowStatus)
 }
