@@ -3,7 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
-	"semen_project/models"
+	"semen_project/internal/models"
 	"strconv"
 	"strings"
 
@@ -15,98 +15,24 @@ func (h *Handlers) GetUserById(ctx *gin.Context) {
 }
 func (h *Handlers) SearchUsers(ctx *gin.Context) {
 }
-func (h *Handlers) GetUserByUsername(ctx *gin.Context) {
+func (h *Handlers) UpdateUser(ctx *gin.Context) {
 }
-func (h *Handlers) SearchUser(ctx *gin.Context) {
-}
-
-// follow&friend
-func (h *Handlers) FollowUser(ctx *gin.Context) {
-}
-func (h *Handlers) UnFollowUser(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllFollowers(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllFollowing(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllFriends(ctx *gin.Context) {
-}
-func (h *Handlers) GetCountFriends(ctx *gin.Context) {
-}
-func (h *Handlers) GetCountFollowers(ctx *gin.Context) {
-}
-func (h *Handlers) GetCountFollowing(ctx *gin.Context) {
+func (h *Handlers) UpdatePassword(ctx *gin.Context) {
 }
 
-// post
-func (h *Handlers) CreatePost(ctx *gin.Context) {
-}
-func (h *Handlers) GetPostById(ctx *gin.Context) {
-}
-func (h *Handlers) GetFeed(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllPosts(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllUserPosts(ctx *gin.Context) {
-}
-func (h *Handlers) DeletePost(ctx *gin.Context) {
-}
-func (h *Handlers) UpdatePost(ctx *gin.Context) {
-}
 
-// like
-func (h *Handlers) LikePost(ctx *gin.Context) {
-}
-func (h *Handlers) DeleteLike(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllPostLikes(ctx *gin.Context) {
-}
-func (h *Handlers) CountLkes(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllUserLike(ctx *gin.Context) {
-}
 
-// comment
-func (h *Handlers) CreateComment(ctx *gin.Context) {
-}
-func (h *Handlers) DeleteComment(ctx *gin.Context) {
-}
-func (h *Handlers) UpdateComment(ctx *gin.Context) {
-}
-func (h *Handlers) GetallPostComments(ctx *gin.Context) {
-}
-func (h *Handlers) GetCountComments(ctx *gin.Context) {
-}
-func (h *Handlers) UpdateMarkReadToRead(ctx *gin.Context) {
-}
 
-// chat
-func (h *Handlers) CreateChat(ctx *gin.Context) {
-}
-func (h *Handlers) SendMessage(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllChats(ctx *gin.Context) {
-}
-func (h *Handlers) DeleteMessage(ctx *gin.Context) {
-}
-func (h *Handlers) DeleteChat(ctx *gin.Context) {
-}
-func (h *Handlers) GetAllMessages(ctx *gin.Context) {
-}
-func (h *Handlers) GetMarkRead(ctx *gin.Context) {
-}
-func (h *Handlers) GetCountNotReadMessage(ctx *gin.Context) {
-}
 
-// authentication
-func (h *Handlers) Register(ctx *gin.Context) {
-}
-func (h *Handlers) Login(ctx *gin.Context) {
-}
-func (h *Handlers) RefreshToken(ctx *gin.Context) {
-}
-func (h *Handlers) Logout(ctx *gin.Context) {
-}
+
+
+
+
+
+
+
+
+
 
 
 

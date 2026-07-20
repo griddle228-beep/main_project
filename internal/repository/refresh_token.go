@@ -1,8 +1,9 @@
-package database
+package repository
+
 
 import (
 	"context"
-	"semen_project/models"
+	"semen_project/internal/models"
 )
 
 func (s *Store) SaveRefreshToken(r models.RefreshToken) error {

@@ -1,17 +1,18 @@
-package pgconn
+package storage
 
 import (
 	"context"
 	"fmt"
-
+	"semen_project/internal/errs"
+	"semen_project/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // ConnectToPg создает подключение к PostgreSQL
-func ConnectToPg(ctx context.Context, cfg DbConfig, appName string) (*pgxpool.Pool, error) {
+func ConnectToPg(ctx context.Context, cfg config.DbConfig, appName string) (*pgxpool.Pool, error) {
 	pgxConfig, err := pgxpool.ParseConfig(cfg.PgConnDsn())
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrWrongConfig, err.Error())
+		return nil, fmt.Errorf("%w: %s", errs.ErrWrongConfig, err.Error())
 	}
 
 	pgxConfig.MaxConns = int32(cfg.PgMaxConn)
@@ -19,14 +20,13 @@ func ConnectToPg(ctx context.Context, cfg DbConfig, appName string) (*pgxpool.Po
 
 	pool, err := pgxpool.NewWithConfig(ctx, pgxConfig)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrEstablishConnect, err.Error())
+		return nil, fmt.Errorf("%w: %s", errs.ErrEstablishConnect, err.Error())
 	}
 
 	if err := pool.Ping(ctx); err != nil {
 		pool.Close()
-		return nil, fmt.Errorf("%w: ping failed: %s", ErrEstablishConnect, err.Error())
+		return nil, fmt.Errorf("%w: ping failed: %s", errs.ErrEstablishConnect, err.Error())
 	}
 
 	return pool, nil
 }
-

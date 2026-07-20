@@ -1,18 +1,18 @@
-package database
+package repository
 
 import (
 	"context"
-	"semen_project/models"
+	"semen_project/internal/models"
 
 )
 
-func (s *Store) CreatePost(p models.Post) (*models.Post, error)  {
+func (s *Store) CreatePost(userId int, content string) (*models.Post, error)  {
 	post := &models.Post{}
 	query := ` INSERT INTO posts (user_id, content)
 	VALUES ($1, $2)
 	RETURNING id, user_id, content;
 	`
-	err := s.db.QueryRow(context.Background(), query, p.UserID, p.Content).Scan(
+	err := s.db.QueryRow(context.Background(), query, userId, content).Scan(
 		&post.ID,
 		&post.UserID,
 		&post.Content,

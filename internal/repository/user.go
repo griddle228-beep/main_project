@@ -1,8 +1,8 @@
-package database
+package repository
 
 import (
 	"context"
-	"semen_project/models"
+	"semen_project/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
